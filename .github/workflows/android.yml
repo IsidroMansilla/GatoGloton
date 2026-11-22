@@ -1,0 +1,70 @@
+name: android
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  build-aab:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar paquetes de Android
+        run: |
+          sdkmanager "platform-tools" "build-tools;36.1.0" "platforms;android-36" "cmdline-tools;latest"
+
+      - name: Descargar Godot
+        run: |
+          curl -fsSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$HOME/godot-bin"
+          chmod +x "$HOME/godot-bin"
+          echo "$HOME" >> "$GITHUB_PATH"
+
+      - name: Descargar export templates
+        run: |
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$TEMPLATE_DIR"
+          curl -fsSL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q templates.tpz -d /tmp/godot-templates
+          mv /tmp/godot-templates/templates/* "$TEMPLATE_DIR/"
+
+      - name: Exportar AAB
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: ${{ github.workspace }}/upload.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEYSTORE_USER }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > upload.keystore
+          mkdir -p build
+          "$HOME/godot-bin" --headless --path . --import
+          "$HOME/godot-bin" --headless --path . --export-release "Google Play" build/gato_gloton.aab
+
+      - name: Subir artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: gato-gloton-aab
+          path: build/gato_gloton.aab
+          retention-days: 14
+
+      - name: Limpiar keystore
+        if: always()
+        run: rm -f upload.keystore
