@@ -1,56 +1,227 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://r5b553g5h6e2"]
 
-[ext_resource type="Script" path="res://src/game/main.gd" id="1_main"]
-[ext_resource type="Script" path="res://src/game/maze.gd" id="2_maze"]
-[ext_resource type="Script" path="res://src/game/player.gd" id="3_player"]
+[ext_resource type="Script" uid="uid://cn4k3wvnik2u7" path="res://src/game/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://1hed3fxwngeb" path="res://src/game/maze.gd" id="2_maze"]
+[ext_resource type="Script" uid="uid://dh7t3u2vucp3q" path="res://src/game/player.gd" id="3_player"]
+[ext_resource type="Script" uid="uid://hoqnhksawdaw" path="res://src/game/arcade_menu.gd" id="4_menu"]
+[ext_resource type="Script" uid="uid://dlkbdhxsae6bu" path="res://src/game/rival_cat.gd" id="5_rival"]
 
-[node name="Main" type="Node2D"]
+[sub_resource type="StyleBoxFlat" id="ButtonNormal"]
+bg_color = Color(0.94902, 0.321569, 0.058824, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.815686, 0.345098, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.956863, 0.447059, 0.101961, 0.35)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="ButtonPressed"]
+bg_color = Color(0.792157, 0.196078, 0.039216, 1)
+border_width_left = 2
+border_width_top = 3
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.815686, 0.345098, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="ButtonHover"]
+bg_color = Color(1, 0.478431, 0.14902, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.941176, 0.682353, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Main" type="Node2D" unique_id=520017608]
 script = ExtResource("1_main")
 
-[node name="Maze" type="Node2D" parent="."]
+[node name="Maze" type="Node2D" parent="." unique_id=312903886]
 script = ExtResource("2_maze")
 
-[node name="Player" type="Node2D" parent="."]
+[node name="Player" type="Node2D" parent="." unique_id=324401616]
 script = ExtResource("3_player")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="RivalCat" type="Node2D" parent="." unique_id=632461924]
+script = ExtResource("5_rival")
 
-[node name="Background" type="ColorRect" parent="UI"]
+[node name="UI" type="CanvasLayer" parent="." unique_id=50351950]
+
+[node name="Menu" type="Control" parent="UI" unique_id=764360469]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-color = Color(0.121569, 0.160784, 0.215686, 1)
+mouse_filter = 1
+script = ExtResource("4_menu")
 
-[node name="Title" type="Label" parent="UI"]
-offset_left = 0.0
-offset_top = 230.0
-offset_right = 360.0
-offset_bottom = 290.0
-theme_override_colors/font_color = Color(0.960784, 0.619608, 0.043137, 1)
-theme_override_font_sizes/font_size = 32
-text = "Gato Gloton"
+[node name="Title" type="Label" parent="UI/Menu" unique_id=1604212522]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 142.0
+offset_right = 332.0
+offset_bottom = 200.0
+theme_override_colors/font_color = Color(1, 0.815686, 0.345098, 1)
+theme_override_colors/font_shadow_color = Color(0.94902, 0.321569, 0.058824, 0.8)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 36
+text = "GATO GLOTON"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="StartButton" type="Button" parent="UI"]
-offset_left = 90.0
-offset_top = 355.0
-offset_right = 270.0
-offset_bottom = 415.0
-theme_override_font_sizes/font_size = 22
-text = "JUGAR"
+[node name="Subtitle" type="Label" parent="UI/Menu" unique_id=2024824356]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 198.0
+offset_right = 320.0
+offset_bottom = 226.0
+theme_override_colors/font_color = Color(0.376471, 0.647059, 0.980392, 1)
+theme_override_font_sizes/font_size = 12
+text = "ARCADE DE LABERINTO"
+horizontal_alignment = 1
 
-[node name="Status" type="Label" parent="UI"]
+[node name="HighScore" type="Label" parent="UI/Menu" unique_id=1298621967]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 254.0
+offset_right = 320.0
+offset_bottom = 288.0
+theme_override_colors/font_color = Color(0.992157, 0.921569, 0.54902, 1)
+theme_override_font_sizes/font_size = 18
+text = "RECORD  0000"
+horizontal_alignment = 1
+
+[node name="StartButton" type="Button" parent="UI/Menu" unique_id=134969091]
+layout_mode = 0
+offset_left = 62.0
+offset_top = 326.0
+offset_right = 298.0
+offset_bottom = 394.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.972549, 0.862745, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 25
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+theme_override_styles/hover = SubResource("ButtonHover")
+text = "INICIAR"
+
+[node name="Hint" type="Label" parent="UI/Menu" unique_id=655905013]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 424.0
+offset_right = 322.0
+offset_bottom = 466.0
+theme_override_colors/font_color = Color(0.65098, 0.67451, 0.792157, 1)
+theme_override_font_sizes/font_size = 13
+text = "COME. ESCAPA. REPITE.
+Desliza para moverte"
+horizontal_alignment = 1
+
+[node name="Footer" type="Label" parent="UI/Menu" unique_id=1983357447]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 566.0
+offset_right = 330.0
+offset_bottom = 592.0
+theme_override_colors/font_color = Color(0.376471, 0.647059, 0.980392, 0.75)
+theme_override_font_sizes/font_size = 11
+text = "INSERT COIN  *  1 JUGADOR"
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="UI" unique_id=1499719314]
+visible = false
 offset_left = 20.0
-offset_top = 470.0
+offset_top = 18.0
 offset_right = 340.0
-offset_bottom = 560.0
+offset_bottom = 62.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
-text = "M0: scaffold listo"
+text = "Puntos: 0 | Record: 0"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
+
+[node name="PauseButton" type="Button" parent="UI"]
+visible = false
+offset_left = 300.0
+offset_top = 14.0
+offset_right = 344.0
+offset_bottom = 54.0
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 18
+text = "II"
+
+[node name="PauseOverlay" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="Shade" type="ColorRect" parent="UI/PauseOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.027451, 0.031373, 0.090196, 0.9)
+
+[node name="Title" type="Label" parent="UI/PauseOverlay"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 198.0
+offset_right = 330.0
+offset_bottom = 248.0
+theme_override_colors/font_color = Color(1, 0.815686, 0.345098, 1)
+theme_override_font_sizes/font_size = 30
+text = "PAUSA"
+horizontal_alignment = 1
+
+[node name="Message" type="Label" parent="UI/PauseOverlay"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 258.0
+offset_right = 330.0
+offset_bottom = 302.0
+theme_override_colors/font_color = Color(0.65098, 0.67451, 0.792157, 1)
+theme_override_font_sizes/font_size = 14
+text = "La partida esta detenida"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="UI/PauseOverlay"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 334.0
+offset_right = 288.0
+offset_bottom = 390.0
+theme_override_font_sizes/font_size = 20
+text = "CONTINUAR"
+
+[node name="RestartButton" type="Button" parent="UI/PauseOverlay"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 404.0
+offset_right = 288.0
+offset_bottom = 460.0
+theme_override_font_sizes/font_size = 20
+text = "REINICIAR"

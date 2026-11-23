@@ -13,23 +13,23 @@ Crear y publicar en Google Play un juego arcade 2D original, desarrollado princi
 - [x] Crear movimiento grid-locked.
 - [x] Añadir control por teclado y swipe.
 - [x] Probar el APK en un telefono Android real.
-- [ ] Crear menu de inicio.
-- [ ] Añadir boton `INICIAR`.
-- [ ] Hacer que `INICIAR` oculte el menu y muestre el laberinto.
-- [ ] Añadir pellets coleccionables reales.
-- [ ] Añadir score por pellet.
-- [ ] Añadir vidas y respawn.
-- [ ] Añadir condicion de nivel completado.
-- [ ] Añadir gatos rivales con IA.
-- [ ] Añadir power-up y modo vulnerable.
-- [ ] Añadir menu de pausa y game over.
-- [ ] Añadir audio y efectos.
-- [ ] Integrar AdMob y UMP.
+- [x] Crear menu de inicio.
+- [x] Añadir boton `INICIAR`.
+- [x] Hacer que `INICIAR` oculte el menu y muestre el laberinto.
+- [x] Añadir pellets coleccionables reales.
+- [x] Añadir score por pellet.
+- [x] Añadir vidas y respawn.
+- [x] Añadir condicion de nivel completado.
+- [x] Añadir gatos rivales con IA.
+- [x] Añadir power-up y modo vulnerable.
+- [x] Añadir menu de pausa y game over.
+- [x] Añadir audio y efectos.
+- [x] Integrar AdMob y UMP.
 - [ ] Crear ficha de Google Play.
 - [ ] Completar test cerrado con 12 testers durante 14 dias.
 - [ ] Publicar la primera version.
 
-## Siguiente objetivo: menu de inicio
+## Objetivo completado: menu de inicio
 
 ### Resultado esperado
 
@@ -68,6 +68,10 @@ Al pulsar `INICIAR`:
 - El gato se mueve despues de iniciar.
 - No hay errores `SCRIPT ERROR` ni crashes en logcat.
 - El APK actualizado se instala mediante `scripts\install_debug.ps1`.
+
+## Siguiente objetivo: M2, coleccionables y puntuacion
+
+La base de pellets, puntuacion y deteccion de nivel completado ya esta implementada. Falta continuar con vidas, respawn y la progresion de partida.
 
 ## Roadmap posterior
 

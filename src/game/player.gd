@@ -1,6 +1,8 @@
 class_name Player
 extends Node2D
 
+signal hit_received
+
 const MOVE_SPEED: float = 72.0
 const INPUT_BUFFER_SECONDS: float = 0.15
 
@@ -10,18 +12,41 @@ var direction: Vector2i = Vector2i.RIGHT
 var queued_direction: Vector2i = Vector2i.RIGHT
 var target_position: Vector2
 var moving: bool = false
+var movement_enabled: bool = true
 var _buffer_time_left: float = 0.0
 
 
 func configure(world: Maze, start_cell: Vector2i = Vector2i(1, 1)) -> void:
 	maze = world
 	cell = start_cell
+	movement_enabled = true
 	global_position = maze.cell_to_position(cell)
 	target_position = global_position
 	queue_redraw()
 
 
+func respawn(start_cell: Vector2i = Vector2i(1, 1)) -> void:
+	if maze == null:
+		return
+	cell = start_cell
+	direction = Vector2i.RIGHT
+	queued_direction = Vector2i.RIGHT
+	_buffer_time_left = 0.0
+	moving = false
+	movement_enabled = true
+	global_position = maze.cell_to_position(cell)
+	target_position = global_position
+	queue_redraw()
+
+
+func receive_hit() -> void:
+	if movement_enabled:
+		hit_received.emit()
+
+
 func request_direction(new_direction: Vector2i) -> void:
+	if not movement_enabled:
+		return
 	if new_direction == Vector2i.ZERO:
 		return
 	if abs(new_direction.x) + abs(new_direction.y) != 1:
@@ -31,7 +56,7 @@ func request_direction(new_direction: Vector2i) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if maze == null:
+	if maze == null or not movement_enabled:
 		return
 
 	_buffer_time_left = maxf(0.0, _buffer_time_left - delta)
@@ -52,11 +77,19 @@ func _physics_process(delta: float) -> void:
 		cell.x = maze.MAP[0].length() - 1
 	elif cell.x >= maze.MAP[0].length():
 		cell.x = 0
+	maze.collect_pellet(cell)
 	moving = false
 	_start_next_move()
 
 
+func stop_movement() -> void:
+	movement_enabled = false
+	moving = false
+
+
 func _start_next_move() -> void:
+	if not movement_enabled:
+		return
 	if _can_move(queued_direction):
 		direction = queued_direction
 	elif not _can_move(direction):

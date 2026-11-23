@@ -1,6 +1,7 @@
 extends Node
 
 signal rewarded_completed
+signal rewarded_failed(reason: String)
 signal interstitial_dismissed
 
 var backend: AdsBackend
@@ -31,6 +32,7 @@ func _on_rewarded_completed() -> void:
 
 
 func _on_rewarded_failed(reason: String) -> void:
+	rewarded_failed.emit(reason)
 	push_warning("Rewarded fallido: %s" % reason)
 
 

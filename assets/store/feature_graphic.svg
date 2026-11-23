@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#070817"/>
+      <stop offset="1" stop-color="#172554"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#11152f"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1024" height="500" fill="url(#bg)"/>
+  <g opacity="0.16" stroke="#93c5fd" stroke-width="2">
+    <path d="M0 70h1024M0 140h1024M0 210h1024M0 280h1024M0 350h1024M0 420h1024"/>
+  </g>
+  <rect x="28" y="28" width="968" height="444" rx="24" fill="url(#panel)" stroke="#60a5fa" stroke-width="4"/>
+  <rect x="48" y="48" width="928" height="404" rx="16" fill="none" stroke="#f97316" stroke-width="3"/>
+  <g fill="#fde68a" filter="url(#glow)">
+    <circle cx="78" cy="74" r="6"/><circle cx="132" cy="74" r="6"/><circle cx="186" cy="74" r="6"/>
+    <circle cx="838" cy="74" r="6"/><circle cx="892" cy="74" r="6"/><circle cx="946" cy="74" r="6"/>
+  </g>
+  <g transform="translate(116 112)">
+    <circle cx="132" cy="152" r="112" fill="#f59e0b"/>
+    <path d="M52 86L82 22L118 92Z" fill="#f59e0b"/>
+    <path d="M212 92L248 22L278 86Z" fill="#f59e0b"/>
+    <path d="M70 78L86 46L106 82Z" fill="#fbbf24"/>
+    <path d="M230 82L250 46L266 78Z" fill="#fbbf24"/>
+    <circle cx="92" cy="136" r="15" fill="#111827"/>
+    <circle cx="172" cy="136" r="15" fill="#111827"/>
+    <circle cx="98" cy="130" r="5" fill="#fff"/>
+    <circle cx="178" cy="130" r="5" fill="#fff"/>
+    <path d="M116 184Q132 202 148 184" fill="none" stroke="#111827" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="240" cy="236" r="20" fill="#92400e"/>
+  </g>
+  <g transform="translate(710 112)" fill="#60a5fa" opacity="0.9">
+    <rect x="0" y="0" width="180" height="180" rx="12" fill="#0b1220" stroke="#2563eb" stroke-width="8"/>
+    <path d="M22 44h58v22H22zM100 44h58v22h-58zM22 88h36v22H22zM78 88h80v22H78zM22 132h58v22H22zM100 132h58v22h-58z" fill="#2563eb"/>
+    <circle cx="34" cy="34" r="4" fill="#fde68a"/><circle cx="146" cy="146" r="4" fill="#fde68a"/>
+  </g>
+  <text x="512" y="190" fill="#fde68a" text-anchor="middle" font-family="sans-serif" font-size="64" font-weight="900" letter-spacing="5">GATO GLOTON</text>
+  <text x="512" y="246" fill="#93c5fd" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="700" letter-spacing="6">ARCADE DE LABERINTO</text>
+  <rect x="342" y="296" width="340" height="68" rx="12" fill="#f97316" stroke="#fde68a" stroke-width="4"/>
+  <text x="512" y="342" fill="#fff7ed" text-anchor="middle" font-family="sans-serif" font-size="30" font-weight="900" letter-spacing="3">COME. ESCAPA. REPITE.</text>
+  <text x="512" y="420" fill="#fbbf24" text-anchor="middle" font-family="sans-serif" font-size="18" letter-spacing="4">POWER-UPS  *  RIVALES  *  RECORDS</text>
+</svg>
