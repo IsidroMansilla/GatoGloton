@@ -51,10 +51,12 @@ func _build() -> void:
 	_summary = _label("", Vector2(30.0, 46.0), Vector2(264.0, 20.0), 6, Color("#60A5FA"))
 	_summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	panel.add_child(_summary)
-	var tabs := HBoxContainer.new()
+	var tabs := GridContainer.new()
+	tabs.columns = 3
 	tabs.position = Vector2(24.0, 70.0)
-	tabs.size = Vector2(276.0, 32.0)
-	tabs.add_theme_constant_override("separation", 6)
+	tabs.size = Vector2(276.0, 96.0)
+	tabs.add_theme_constant_override("h_separation", 6)
+	tabs.add_theme_constant_override("v_separation", 6)
 	panel.add_child(tabs)
 	for category in CosmeticCatalog.get_categories():
 		var key := category
@@ -66,8 +68,8 @@ func _build() -> void:
 		_tab_buttons[category] = button
 		tabs.add_child(button)
 	var scroll := ScrollContainer.new()
-	scroll.position = Vector2(22.0, 108.0)
-	scroll.size = Vector2(280.0, 344.0)
+	scroll.position = Vector2(22.0, 172.0)
+	scroll.size = Vector2(280.0, 278.0)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	panel.add_child(scroll)
 	_list = VBoxContainer.new()
@@ -101,13 +103,13 @@ func _build_card(definition: CosmeticDefinition) -> PanelContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	margin.add_child(row)
-	var swatches := VBoxContainer.new()
-	swatches.add_theme_constant_override("separation", 2)
-	row.add_child(swatches)
-	var primary_key := "wall" if _category == "maze" else "primary"
-	var secondary_key := "edge" if _category == "maze" else "secondary"
-	swatches.add_child(_swatch(definition.colors.get(primary_key, Color("#1F2937"))))
-	swatches.add_child(_swatch(definition.colors.get(secondary_key, Color("#1F2937"))))
+	var swatch_keys := _swatch_keys_for(_category)
+	if not swatch_keys.is_empty():
+		var swatches := VBoxContainer.new()
+		swatches.add_theme_constant_override("separation", 2)
+		row.add_child(swatches)
+		for key in swatch_keys:
+			swatches.add_child(_swatch(definition.colors.get(key, Color("#1F2937"))))
 	var info := VBoxContainer.new()
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_theme_constant_override("separation", 2)
@@ -135,6 +137,19 @@ func _build_card(definition: CosmeticDefinition) -> PanelContainer:
 	return card
 
 
+func _swatch_keys_for(category: String) -> Array[String]:
+	match category:
+		"maze":
+			return ["wall", "edge"]
+		"pellets":
+			return ["pellet", "power"]
+		"effects":
+			return ["burst", "ring"]
+		"player", "rival":
+			return ["primary", "secondary"]
+	return []
+
+
 func _swatch(color: Variant) -> ColorRect:
 	var rect := ColorRect.new()
 	rect.custom_minimum_size = Vector2(18.0, 18.0)
@@ -155,6 +170,7 @@ func _label(text: String, position: Vector2, size: Vector2, font_size: int, colo
 func _tab_button(text: String) -> Button:
 	var button := Button.new()
 	button.text = text
+	button.custom_minimum_size = Vector2(0.0, 28.0)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.add_theme_font_size_override("font_size", 7)
 	button.add_theme_stylebox_override("normal", _tab_style(false))

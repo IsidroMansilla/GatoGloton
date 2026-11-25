@@ -43,6 +43,7 @@ var _active_power_pellet_cells: Array[Vector2i] = []
 var origin: Vector2 = Vector2(12.0, 104.0)
 var tile_size: float = TILE_SIZE
 var _pellets: Dictionary = {}
+var _effects: Array[Dictionary] = []
 var _walkable_cells: Array[Vector2i] = []
 var map_id: String = "map_01"
 var player_spawn_cell: Vector2i = Vector2i(1, 1)
@@ -52,6 +53,17 @@ var rival_spawn_cells: Array[Vector2i] = [Vector2i(10, 9)]
 func _ready() -> void:
 	_assert_map_is_valid()
 	_cache_walkable_cells()
+	queue_redraw()
+
+
+func _process(delta: float) -> void:
+	if _effects.is_empty():
+		return
+	for index in range(_effects.size() - 1, -1, -1):
+		var effect: Dictionary = _effects[index]
+		effect["age"] = float(effect.get("age", 0.0)) + delta
+		if float(effect["age"]) >= float(effect.get("duration", 0.3)):
+			_effects.remove_at(index)
 	queue_redraw()
 
 
@@ -78,6 +90,7 @@ func configure_map(map_data: MazeData) -> void:
 
 func reset_pellets(start_cell: Vector2i, power_up_count: int = POWER_PELLET_CELLS.size()) -> void:
 	_pellets.clear()
+	_effects.clear()
 	_active_power_pellet_cells.clear()
 	var selected_count := mini(power_up_count, POWER_PELLET_CELLS.size())
 	for index in selected_count:
@@ -96,6 +109,7 @@ func collect_pellet(cell: Vector2i) -> bool:
 		return false
 	var points := int(_pellets[cell])
 	_pellets.erase(cell)
+	_spawn_collect_effect(cell, points == POWER_PELLET_POINTS)
 	pellet_collected.emit(points)
 	if points == POWER_PELLET_POINTS:
 		power_pellet_collected.emit()
@@ -107,6 +121,26 @@ func collect_pellet(cell: Vector2i) -> bool:
 
 func pellets_remaining() -> int:
 	return _pellets.size()
+
+
+func _spawn_collect_effect(cell: Vector2i, is_power: bool) -> void:
+	var data := _cosmetic_data("effects")
+	if not bool(data.get("burst", false)):
+		return
+	var palette := _cosmetic_palette("effects")
+	var ring_color: Color = palette.get("ring", palette.get("burst", DOT_COLOR))
+	var particle_color: Color = palette.get("burst", ring_color)
+	_effects.append({
+		"position": cell_to_position(cell),
+		"age": 0.0,
+		"duration": 0.45 if is_power else 0.3,
+		"radius": 18.0 if is_power else 11.0,
+		"color": ring_color,
+		"particle_color": particle_color,
+		"particles": bool(data.get("particles", false)),
+	})
+	if _effects.size() > 32:
+		_effects.pop_front()
 
 
 func cell_to_position(cell: Vector2i) -> Vector2:
@@ -159,7 +193,10 @@ func _draw() -> void:
 	var wall_color: Color = palette.get("wall", WALL_COLOR)
 	var edge_color: Color = palette.get("edge", WALL_EDGE_COLOR)
 	var floor_color: Color = palette.get("floor", FLOOR_COLOR)
-	var dot_color: Color = palette.get("dot", DOT_COLOR)
+	var pellet_palette := _cosmetic_palette("pellets")
+	var pellet_data := _cosmetic_data("pellets")
+	var pellet_color: Color = pellet_palette.get("pellet", DOT_COLOR)
+	var power_color: Color = pellet_palette.get("power", DOT_COLOR)
 	var map_size := Vector2(MAP[0].length(), MAP.size()) * tile_size
 	draw_rect(Rect2(origin - Vector2(5.0, 5.0), map_size + Vector2(10.0, 10.0)), floor_color)
 
@@ -171,8 +208,27 @@ func _draw() -> void:
 				draw_rect(rect.grow(-1.5), wall_color)
 				draw_rect(rect.grow(-3.5), edge_color, false, 1.0)
 			elif _pellets.has(cell):
-				var radius := 2.8 if int(_pellets[cell]) == POWER_PELLET_POINTS else 1.2
-				draw_circle(cell_to_position(cell), radius, dot_color)
+				var is_power := int(_pellets[cell]) == POWER_PELLET_POINTS
+				var radius := 2.8 if is_power else 1.2
+				var position := cell_to_position(cell)
+				draw_circle(position, radius, power_color if is_power else pellet_color)
+				if is_power and bool(pellet_data.get("power_ring", false)):
+					draw_arc(position, radius + 2.0, 0.0, TAU, 16, power_color, 1.0, true)
+
+	for effect in _effects:
+		var progress := float(effect["age"]) / float(effect["duration"])
+		var color: Color = effect["color"]
+		color.a = 1.0 - progress
+		var effect_position: Vector2 = effect["position"]
+		var radius := lerpf(3.0, float(effect["radius"]), progress)
+		draw_arc(effect_position, radius, 0.0, TAU, 24, color, 2.0, true)
+		if bool(effect["particles"]):
+			var particle_color: Color = effect["particle_color"]
+			particle_color.a = (1.0 - progress) * 0.9
+			for index in 6:
+				var angle := TAU * float(index) / 6.0 + progress * 1.5
+				var point := effect_position + Vector2(cos(angle), sin(angle)) * radius
+				draw_circle(point, 1.6 * (1.0 - progress), particle_color)
 
 
 func _assert_map_is_valid() -> void:
@@ -230,4 +286,12 @@ func _cosmetic_palette(category: String) -> Dictionary:
 	if manager == null:
 		return {}
 	var result: Dictionary = manager.call("get_palette", category)
+	return result
+
+
+func _cosmetic_data(category: String) -> Dictionary:
+	var manager := get_node_or_null("/root/UnlockManager")
+	if manager == null:
+		return {}
+	var result: Dictionary = manager.call("get_data", category)
 	return result

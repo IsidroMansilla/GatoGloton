@@ -78,6 +78,13 @@ func get_palette(category: String) -> Dictionary:
 	return definition.colors.duplicate(true)
 
 
+func get_data(category: String) -> Dictionary:
+	var definition := get_selected_definition(category)
+	if definition == null:
+		return {}
+	return definition.data.duplicate(true)
+
+
 func get_items(category: String) -> Array[CosmeticDefinition]:
 	return CosmeticCatalog.get_category(category)
 

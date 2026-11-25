@@ -299,14 +299,14 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 - [x] Integrar visualmente pausa, game over y modo personalizado.
 - [x] Centrar el laberinto horizontal y verticalmente.
 
-- [ ] Crear estilos alternativos del jugador.
-- [ ] Crear estilos alternativos de rivales.
-- [ ] Crear estilos alternativos de mapas.
-- [ ] Crear estilos alternativos de bolas de pelo y power-ups.
-- [ ] Crear efectos visuales desbloqueables.
-- [ ] Crear efectos de sonido desbloqueables.
-- [ ] Crear musica desbloqueable.
-- [ ] Validar contraste y visibilidad de todos los estilos.
+- [x] Crear estilos alternativos del jugador.
+- [x] Crear estilos alternativos de rivales.
+- [x] Crear estilos alternativos de mapas.
+- [x] Crear estilos alternativos de bolas de pelo y power-ups.
+- [x] Crear efectos visuales desbloqueables.
+- [x] Crear efectos de sonido desbloqueables.
+- [x] Crear musica desbloqueable.
+- [x] Validar contraste y visibilidad de todos los estilos.
 
 ### Fase 10: Publicacion y calidad
 

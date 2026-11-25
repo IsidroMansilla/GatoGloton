@@ -10,6 +10,7 @@ extends Resource
 @export var rule_id: String = ""
 @export var requirement_text: String = ""
 @export var colors: Dictionary = {}
+@export var data: Dictionary = {}
 
 
 func is_default() -> bool:

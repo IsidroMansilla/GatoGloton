@@ -16,7 +16,9 @@ func _initialize() -> void:
 	_test_achievement_progress()
 	_test_cosmetic_catalog()
 	_test_cosmetic_rules()
+	_test_contrast()
 	_test_manager_api()
+	_test_audio_styles()
 	await process_frame
 	print("Progression test: %d passed, %d failed" % [passed, failed])
 	if failed > 0 or not _uses_quit_after:
@@ -54,7 +56,7 @@ func _test_achievement_progress() -> void:
 func _test_cosmetic_catalog() -> void:
 	var errors := CosmeticCatalog.validate()
 	_check(errors.is_empty(), "catalogo de cosmeticos valido: %s" % ", ".join(errors))
-	_check(CosmeticCatalog.get_categories().size() == 3, "hay tres categorias de cosmeticos")
+	_check(CosmeticCatalog.get_categories().size() == 7, "hay siete categorias de cosmeticos")
 	for category in CosmeticCatalog.get_categories():
 		var items := CosmeticCatalog.get_category(category)
 		_check(not items.is_empty(), "categoria %s tiene cosmeticos" % category)
@@ -67,6 +69,10 @@ func _test_cosmetic_catalog() -> void:
 	_check(CosmeticCatalog.get_by_id("player_mint") != null, "existe cosmetico de jugador")
 	_check(CosmeticCatalog.get_by_id("rival_frost") != null, "existe cosmetico de rival")
 	_check(CosmeticCatalog.get_by_id("maze_neon") != null, "existe cosmetico de mapa")
+	_check(CosmeticCatalog.get_by_id("pellets_candy") != null, "existe estilo de bolas")
+	_check(CosmeticCatalog.get_by_id("effects_spark") != null, "existe efecto visual")
+	_check(CosmeticCatalog.get_by_id("sfx_deep") != null, "existe estilo de sonido")
+	_check(CosmeticCatalog.get_by_id("music_arcade") != null, "existe pista de musica")
 
 
 func _test_cosmetic_rules() -> void:
@@ -84,6 +90,49 @@ func _test_cosmetic_rules() -> void:
 	var forest := CosmeticCatalog.get_by_id("maze_forest")
 	_check(not forest.requirement_met({"levels_completed": 9}, 0, 1, {}), "cosmetico de niveles bloqueado")
 	_check(forest.requirement_met({"levels_completed": 10}, 0, 1, {}), "cosmetico de niveles desbloqueado")
+	var candy := CosmeticCatalog.get_by_id("pellets_candy")
+	_check(not candy.requirement_met({}, 0, 1, {}), "estilo de bolas por logro bloqueado")
+	_check(candy.requirement_met({}, 0, 1, {"pellets_100": true}), "estilo de bolas por logro desbloqueado")
+	_check(bool(candy.data.get("power_ring", false)), "estilo de bolas define aro de power-up")
+	var spark := CosmeticCatalog.get_by_id("effects_spark")
+	_check(bool(spark.data.get("burst", false)), "efecto spark activa estallido")
+	_check(bool(spark.data.get("particles", false)), "efecto spark activa particulas")
+	var deep_sfx := CosmeticCatalog.get_by_id("sfx_deep")
+	_check(not deep_sfx.requirement_met({"runs_finished": 2}, 0, 1, {}), "estilo de sonido bloqueado")
+	_check(deep_sfx.requirement_met({"runs_finished": 3}, 0, 1, {}), "estilo de sonido desbloqueado")
+	_check(String(deep_sfx.data.get("style", "")) == "deep", "estilo de sonido declara su variante")
+	var arcade_music := CosmeticCatalog.get_by_id("music_arcade")
+	_check(not arcade_music.requirement_met({}, 0, 4, {}), "musica bloqueada por nivel")
+	_check(arcade_music.requirement_met({}, 0, 5, {}), "musica desbloqueada por nivel")
+	_check(String(arcade_music.data.get("track", "")) == "arcade", "musica declara su pista")
+	_check(CosmeticCatalog.get_by_id("music_off").data.get("track", "x") == "", "musica por defecto silenciada")
+
+
+func _test_contrast() -> void:
+	var errors := CosmeticCatalog.validate_contrast()
+	_check(errors.is_empty(), "contraste valido: %s" % ", ".join(errors))
+	_check(CosmeticCatalog.contrast_ratio(Color.WHITE, Color.BLACK) > 20.0, "contraste blanco/negro alto")
+	_check(CosmeticCatalog.contrast_ratio(Color.WHITE, Color.WHITE) < 1.01, "contraste igual es bajo")
+	_check(CosmeticCatalog.contrast_ratio(Color("#FDE68A"), Color("#0B1220")) > 4.0, "bolas destacan sobre el suelo")
+	_check(CosmeticCatalog.contrast_ratio(Color("#F59E0B"), Color("#0B1220")) > 3.0, "jugador destaca sobre el suelo")
+
+
+func _test_audio_styles() -> void:
+	var audio := root.get_node_or_null("AudioManager")
+	_check(audio != null, "autoload AudioManager disponible")
+	if audio == null:
+		return
+	audio.set_sfx_style("deep")
+	_check(String(audio.get("_sfx_style")) == "deep", "aplica estilo de sonido grave")
+	audio.set_sfx_style("invalido")
+	_check(String(audio.get("_sfx_style")) == "classic", "estilo de sonido invalido usa clasico")
+	var stream: AudioStreamWAV = audio.call("_build_music_stream", "arcade")
+	_check(stream != null and stream.data.size() > 0, "genera pista de musica arcade")
+	_check(stream.loop_mode == AudioStreamWAV.LOOP_FORWARD, "pista arcade reproduce en bucle")
+	var night: AudioStreamWAV = audio.call("_build_music_stream", "night")
+	_check(night != null and night.data.size() > 0, "genera pista de musica nocturna")
+	var invalid: AudioStreamWAV = audio.call("_build_music_stream", "invalida")
+	_check(invalid == null, "pista de musica invalida no se genera")
 
 
 func _test_manager_api() -> void:

@@ -10,7 +10,7 @@
 - Plataforma objetivo: Android / Google Play.
 - Orientacion: portrait.
 - Resolucion logica: `360x640`, stretch `canvas_items`.
-- Estado: base jugable completa, guardado ampliado, logros y personalización; pendientes balance final, arte alternativo y publicación.
+- Estado: base jugable completa, guardado ampliado, logros, personalización visual y audio desbloqueable; pendientes balance final, rendimiento y publicación.
 
 ## Entorno
 
@@ -80,8 +80,13 @@ android/                    # plantilla de exportacion Android
 
 - Catalogo de 17 logros basado en niveles, partidas, puntuacion, pellets,
   power-ups, rivales y niveles completados sin dano.
-- Catalogo de 9 cosmeticos en tres categorias: gato, rivales y mapa.
-- Los cosmeticos aplican paletas propias al jugador, a los rivales y al laberinto.
+- Catalogo de 21 cosmeticos en siete categorias: gato, rivales, mapa, bolas,
+  efectos, sonido y musica.
+- Los cosmeticos aplican paletas al jugador, rivales, laberinto, bolas y
+  power-ups, y anaden aros o particulas de recogida.
+- Estilos de sonido sintetizados (`classic`, `chip`, `deep`) y dos pistas de
+  musica generadas y reproducidas en bucle.
+- Contraste validado por pruebas para todas las paletas sobre cada suelo.
 - Evaluacion de logros y desbloqueos solo durante partidas progresivas.
 - Notificacion retro de desbloqueo durante la partida.
 - Pantalla de logros con progreso por objetivo y pantalla de personalizacion
@@ -114,11 +119,12 @@ El runner `tests/save_test_runner.gd` valida guardado, migraciones v1/v2, archiv
 ausente, corrupto, version futura, tipos invalidos, escritura fallida y el
 aislamiento de las partidas personalizadas.
 
-El runner `tests/progression_test_runner.gd` valida los catalogos de logros y
-cosmeticos, el calculo de progreso y las reglas de desbloqueo.
+El runner `tests/progression_test_runner.gd` valida los catalogos de logros,
+cosmeticos y audio, el calculo de progreso, las reglas de desbloqueo, el contraste
+visual y la generacion de pistas musicales.
 
 Resultado validado actualmente: `380 passed, 0 failed` en mapas, `97 passed, 0 failed`
-en guardado y `45 passed, 0 failed` en progresion.
+en guardado y `85 passed, 0 failed` en progresion.
 
 Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 `Start-Process -Wait -PassThru`, porque el ejecutable Mono puede dejar
@@ -128,7 +134,6 @@ Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 
 - Balancear la progresion completa jugando niveles iniciales, intermedios y finales.
 - Probar rendimiento del nivel 30 en Android.
-- Ampliar estilos alternativos de arte y audio (Fase 9).
 - Generar AAB release, completar Play Console y realizar closed testing 12/14.
 
 ## Reglas de trabajo

@@ -15,9 +15,13 @@ const STAT_KEYS: PackedStringArray = [
 	"lives_lost",
 ]
 const DEFAULT_COSMETICS: Dictionary = {
-	"player": "default",
-	"rival": "default",
-	"maze": "default",
+	"player": "player_ember",
+	"rival": "rival_rose",
+	"maze": "maze_classic",
+	"pellets": "pellets_classic",
+	"effects": "effects_classic",
+	"sfx": "sfx_classic",
+	"music": "music_off",
 }
 
 signal high_score_changed(value: int)
