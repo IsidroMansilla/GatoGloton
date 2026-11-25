@@ -1,5 +1,7 @@
 # Recursos de Google Play
 
+- `icon_512.png` es el icono de la ficha (512x512, sin transparencia). Se genera
+  con `scripts/render_icon.gd` a partir de `assets/source/gato_icon_reference.jpg`.
 - `feature_graphic.svg` es el arte fuente del grafico destacado.
 - Exportar el SVG a PNG/JPG de 1024x500 antes de subirlo a Play Console.
 - Usar capturas verticales reales del APK instalado, sin marcos de dispositivo

@@ -48,7 +48,7 @@ reflejos, rutas cortas y decisiones rapidas.`
 
 ## Recursos graficos
 
-- Icono de aplicacion: disponible en `assets/icon.svg`, 512x512.
+- Icono de aplicacion: `assets/icon_pixel.png`, 512x512. Copia para la ficha en `assets/store/icon_512.png`.
 - Grafico de funciones: disponible en `assets/store/feature_graphic.png`, 1024x500.
 - Captura vertical 1: menu arcade con tipografia Press Start 2P.
 - Captura vertical 2: gameplay con HUD retro, mapa centrado, pellets y rival.
