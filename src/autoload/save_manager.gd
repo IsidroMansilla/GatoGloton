@@ -22,6 +22,7 @@ const DEFAULT_COSMETICS: Dictionary = {
 
 signal high_score_changed(value: int)
 signal highest_level_changed(value: int)
+signal stats_changed(stats: Dictionary)
 signal custom_config_changed(config: Dictionary)
 signal save_failed(path: String)
 
@@ -153,33 +154,36 @@ func get_achievement_progress(id: String) -> int:
 	return int(achievements.get(id, 0))
 
 
-func set_achievement_progress(id: String, value: int) -> void:
+func set_achievement_progress(id: String, value: int, persist: bool = true) -> void:
 	if id.is_empty():
 		return
 	achievements[id] = maxi(0, value)
-	save_game()
+	if persist:
+		save_game()
 
 
 func get_unlock_state(id: String) -> bool:
 	return bool(unlocks.get(id, false))
 
 
-func set_unlock_state(id: String, unlocked: bool) -> void:
+func set_unlock_state(id: String, unlocked: bool, persist: bool = true) -> void:
 	if id.is_empty():
 		return
 	unlocks[id] = unlocked
-	save_game()
+	if persist:
+		save_game()
 
 
 func get_cosmetic(slot: String) -> String:
 	return String(cosmetics.get(slot, ""))
 
 
-func set_cosmetic(slot: String, value: String) -> void:
+func set_cosmetic(slot: String, value: String, persist: bool = true) -> void:
 	if slot.is_empty() or value.is_empty():
 		return
 	cosmetics[slot] = value
-	save_game()
+	if persist:
+		save_game()
 
 
 func get_save_data() -> Dictionary:
@@ -273,6 +277,7 @@ func _default_stats() -> Dictionary:
 
 func _increment_stat(key: String) -> void:
 	stats[key] = int(stats.get(key, 0)) + 1
+	stats_changed.emit(get_stats())
 
 
 func _migrate(data: Dictionary) -> Dictionary:

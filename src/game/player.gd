@@ -115,8 +115,9 @@ func _can_move(candidate: Vector2i) -> bool:
 
 
 func _draw() -> void:
-	var fur := Color("#F59E0B")
-	var ear_inner := Color("#FBBF24")
+	var palette := _cosmetic_palette("player")
+	var fur: Color = palette.get("primary", Color("#F59E0B"))
+	var ear_inner: Color = palette.get("secondary", Color("#FBBF24"))
 	draw_circle(Vector2.ZERO, 6.0, fur)
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(-5.0, -3.0),
@@ -131,3 +132,11 @@ func _draw() -> void:
 	draw_circle(Vector2(-2.2, -1.0), 1.0, Color("#111827"))
 	draw_circle(Vector2(2.2, -1.0), 1.0, Color("#111827"))
 	draw_circle(Vector2(0.0, 2.0), 1.0, ear_inner)
+
+
+func _cosmetic_palette(category: String) -> Dictionary:
+	var manager := get_node_or_null("/root/UnlockManager")
+	if manager == null:
+		return {}
+	var result: Dictionary = manager.call("get_palette", category)
+	return result

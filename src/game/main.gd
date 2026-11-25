@@ -19,6 +19,8 @@ const ARCADE_THEME: Theme = preload("res://assets/fonts/arcade_theme.tres")
 @onready var _menu: Control = $UI/Menu
 @onready var _start_button: Button = $UI/Menu/StartButton
 @onready var _custom_button: Button = $UI/Menu/CustomButton
+@onready var _achievements_button: Button = $UI/Menu/AchievementsButton
+@onready var _customize_button: Button = $UI/Menu/CustomizeButton
 
 enum GameMode { MENU, PLAYING, PAUSED, GAME_OVER, LEVEL_CLEAR }
 var _mode: GameMode = GameMode.MENU
@@ -39,6 +41,12 @@ var _custom_rival_count: HSlider
 var _custom_difficulty: HSlider
 var _custom_power_ups: HSlider
 var _custom_value_labels: Dictionary = {}
+var _achievements_screen: AchievementsScreen
+var _customization_screen: CustomizationScreen
+var _toast_panel: Panel
+var _toast_label: Label
+var _toast_queue: Array[String] = []
+var _toast_active: bool = false
 
 
 func _ready() -> void:
@@ -59,6 +67,8 @@ func _ready() -> void:
 	_pause_overlay.visible = false
 	_start_button.pressed.connect(_start_game)
 	_custom_button.pressed.connect(_open_custom_menu)
+	_achievements_button.pressed.connect(_open_achievements)
+	_customize_button.pressed.connect(_open_customization)
 	_pause_button.pressed.connect(_toggle_pause)
 	_resume_button.pressed.connect(_on_resume_button_pressed)
 	_restart_button.pressed.connect(_restart_game)
@@ -70,8 +80,13 @@ func _ready() -> void:
 	_maze.pellet_collected.connect(_on_pellet_collected)
 	_maze.power_pellet_collected.connect(_on_power_pellet_collected)
 	_maze.level_completed.connect(_on_level_completed)
+	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
+	UnlockManager.cosmetic_unlocked.connect(_on_cosmetic_unlocked)
+	UnlockManager.cosmetics_changed.connect(_on_cosmetics_changed)
 	$UI/Menu/HighScore.text = "RECORD  %04d\nNIVEL MAXIMO  %02d" % [SaveManager.high_score, SaveManager.highest_level]
 	_build_custom_panel()
+	_build_progress_screens()
+	_build_unlock_toast()
 
 
 func _start_game() -> void:
@@ -318,6 +333,98 @@ func _return_to_menu() -> void:
 	_is_custom_game = false
 	_custom_panel.visible = false
 	$UI/Menu/HighScore.text = "RECORD  %04d\nNIVEL MAXIMO  %02d" % [SaveManager.high_score, SaveManager.highest_level]
+
+
+func _open_achievements() -> void:
+	if _mode != GameMode.MENU:
+		return
+	_menu.visible = false
+	_achievements_screen.open()
+
+
+func _open_customization() -> void:
+	if _mode != GameMode.MENU:
+		return
+	_menu.visible = false
+	_customization_screen.open()
+
+
+func _close_progress_screens() -> void:
+	_achievements_screen.visible = false
+	_customization_screen.visible = false
+	_menu.visible = true
+
+
+func _build_progress_screens() -> void:
+	_achievements_screen = AchievementsScreen.new()
+	$UI.add_child(_achievements_screen)
+	_achievements_screen.closed.connect(_close_progress_screens)
+	_customization_screen = CustomizationScreen.new()
+	$UI.add_child(_customization_screen)
+	_customization_screen.closed.connect(_close_progress_screens)
+
+
+func _build_unlock_toast() -> void:
+	_toast_panel = Panel.new()
+	_toast_panel.position = Vector2(30.0, 88.0)
+	_toast_panel.size = Vector2(300.0, 46.0)
+	_toast_panel.z_index = 100
+	_toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("#11152F")
+	style.border_color = Color("#FDE68A")
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(6)
+	_toast_panel.add_theme_stylebox_override("panel", style)
+	_toast_label = Label.new()
+	_toast_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_toast_label.add_theme_font_size_override("font_size", 7)
+	_toast_label.add_theme_color_override("font_color", Color("#FDE68A"))
+	_toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_toast_panel.add_child(_toast_label)
+	_toast_panel.visible = false
+	$UI.add_child(_toast_panel)
+
+
+func _on_achievement_unlocked(id: String) -> void:
+	var definition := AchievementCatalog.get_by_id(id)
+	if definition != null:
+		_queue_unlock_toast("LOGRO: " + definition.title)
+
+
+func _on_cosmetic_unlocked(id: String) -> void:
+	var definition := CosmeticCatalog.get_by_id(id)
+	if definition != null:
+		_queue_unlock_toast("DESBLOQUEADO: " + definition.title)
+
+
+func _on_cosmetics_changed(_category: String, _id: String) -> void:
+	_player.queue_redraw()
+	for rival in _rivals:
+		rival.queue_redraw()
+	_maze.queue_redraw()
+
+
+func _queue_unlock_toast(text: String) -> void:
+	_toast_queue.append(text)
+	if not _toast_active:
+		_show_next_unlock_toast()
+
+
+func _show_next_unlock_toast() -> void:
+	if _toast_queue.is_empty():
+		_toast_active = false
+		_toast_panel.visible = false
+		return
+	_toast_active = true
+	_toast_label.text = _toast_queue.pop_front()
+	_toast_panel.visible = true
+	await get_tree().create_timer(2.6).timeout
+	if not is_inside_tree():
+		return
+	_show_next_unlock_toast()
 
 
 func _open_custom_menu() -> void:

@@ -136,8 +136,10 @@ func _distance_to_target(from_cell: Vector2i, target: Vector2i) -> int:
 
 
 func _draw() -> void:
-	var fur := Color("#60A5FA") if state == RivalState.FRIGHTENED else Color("#EC4899")
-	var shadow := Color("#BE185D")
+	var palette := _cosmetic_palette("rival")
+	var frightened: Color = palette.get("frightened", Color("#60A5FA"))
+	var fur: Color = frightened if state == RivalState.FRIGHTENED else palette.get("primary", Color("#EC4899"))
+	var shadow: Color = palette.get("secondary", Color("#BE185D"))
 	draw_circle(Vector2.ZERO, 6.0, fur)
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(-5.0, -3.0),
@@ -152,3 +154,11 @@ func _draw() -> void:
 	draw_circle(Vector2(-2.2, -1.0), 1.0, Color("#111827"))
 	draw_circle(Vector2(2.2, -1.0), 1.0, Color("#111827"))
 	draw_line(Vector2(-3.0, 3.0), Vector2(3.0, 3.0), shadow, 1.0)
+
+
+func _cosmetic_palette(category: String) -> Dictionary:
+	var manager := get_node_or_null("/root/UnlockManager")
+	if manager == null:
+		return {}
+	var result: Dictionary = manager.call("get_palette", category)
+	return result

@@ -10,7 +10,7 @@ Arcade de laberinto 2D para Android, en estilo Pac-Man pero con IP propia: un ga
 - Plataforma objetivo: Android (Play Store), `minSdk 24`, `targetSdk 36`, `arm64-v8a`.
 - Vista: **portrait**, viewport base 360x640, `stretch=canvas_items`, `aspect=keep`.
 - Arte: vector plano original. Sin assets ni marcas de terceros.
-- Estado actual: base jugable completa, 30 niveles progresivos, modo personalizado, game over con rewarded, UI retro y pruebas headless.
+- Estado actual: base jugable completa, 30 niveles progresivos, modo personalizado, game over con rewarded, logros, desbloqueos, personalizacion visual, UI retro y pruebas headless.
 
 ## 2. Comandos
 
@@ -48,10 +48,10 @@ Variables de release (Godot las lee directamente):
 ```
 project.godot
 export_presets.cfg          # presets "Android" (APK) y "Google Play" (AAB)
-src/autoload/               # singletons: GameState, SaveManager, ProgressionManager, AudioManager, AdsManager
+src/autoload/               # singletons: GameState, SaveManager, ProgressionManager, AchievementManager, UnlockManager, AudioManager, AdsManager
 src/ads/                    # AdsBackend, MockAds, AdMobBackend
-src/game/                   # escenas y scripts de juego (main, maze, player, rival_cat)
-src/data/                   # configuracion de niveles, mapas y modo personalizado
+src/game/                   # escenas y scripts de juego (main, maze, player, rival_cat, pantallas)
+src/data/                   # niveles, mapas, logros, cosmeticos y modo personalizado
 assets/                     # sprites, audio, fuentes, mapas, icono y recursos de tienda
 tests/                      # runner headless y pruebas de cobertura de mapas
 scripts/                    # build, validacion y renderizado
@@ -76,6 +76,8 @@ scripts/                    # build, validacion y renderizado
   - `GameState`: score, vidas, nivel, modo personalizado y senales de cambio.
   - `SaveManager`: JSON versionado v3 en `user://save.json`, record, nivel maximo, estadisticas, logros/desbloqueos/cosmeticos y ultima config personalizada.
   - `ProgressionManager`: catalogo y avance de los 30 niveles progresivos.
+  - `AchievementManager`: catalogo, progreso y notificaciones de los 17 logros.
+  - `UnlockManager`: reglas, seleccion y paletas de los cosmeticos desbloqueables.
   - `AudioManager`: volumen/mute, reproduccion de SFX y musica.
   - `AdsManager`: fachada sobre `AdsBackend`; elige `MockAds` en desktop/editor y `AdMobBackend` en Android.
 - **Juego**
@@ -124,7 +126,7 @@ scripts/                    # build, validacion y renderizado
 
 - `godot --headless --path . --import` termina sin errores.
 - La app arranca en desktop y en un Android real sin crashes.
-- `tests/test_runner.gd` y `tests/save_test_runner.gd` en verde: validan los 30 mapas, la cobertura de pellets, el guardado y las migraciones.
+- `tests/test_runner.gd`, `tests/save_test_runner.gd` y `tests/progression_test_runner.gd` en verde: validan los 30 mapas, la cobertura de pellets, el guardado, las migraciones, los logros y los desbloqueos.
 - Sin secretos ni arte con licencia incompatible en el diff.
 - Diff pequeno, con mensaje de commit claro.
 

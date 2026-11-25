@@ -155,19 +155,24 @@ func get_random_safe_spawn_cell(occupied_cells: Array[Vector2i] = [], min_distan
 
 
 func _draw() -> void:
+	var palette := _cosmetic_palette("maze")
+	var wall_color: Color = palette.get("wall", WALL_COLOR)
+	var edge_color: Color = palette.get("edge", WALL_EDGE_COLOR)
+	var floor_color: Color = palette.get("floor", FLOOR_COLOR)
+	var dot_color: Color = palette.get("dot", DOT_COLOR)
 	var map_size := Vector2(MAP[0].length(), MAP.size()) * tile_size
-	draw_rect(Rect2(origin - Vector2(5.0, 5.0), map_size + Vector2(10.0, 10.0)), FLOOR_COLOR)
+	draw_rect(Rect2(origin - Vector2(5.0, 5.0), map_size + Vector2(10.0, 10.0)), floor_color)
 
 	for y in MAP.size():
 		for x in MAP[y].length():
 			var cell := Vector2i(x, y)
 			var rect := Rect2(origin + Vector2(cell) * tile_size, Vector2.ONE * tile_size)
 			if not is_walkable(cell):
-				draw_rect(rect.grow(-1.5), WALL_COLOR)
-				draw_rect(rect.grow(-3.5), WALL_EDGE_COLOR, false, 1.0)
+				draw_rect(rect.grow(-1.5), wall_color)
+				draw_rect(rect.grow(-3.5), edge_color, false, 1.0)
 			elif _pellets.has(cell):
 				var radius := 2.8 if int(_pellets[cell]) == POWER_PELLET_POINTS else 1.2
-				draw_circle(cell_to_position(cell), radius, DOT_COLOR)
+				draw_circle(cell_to_position(cell), radius, dot_color)
 
 
 func _assert_map_is_valid() -> void:
@@ -218,3 +223,11 @@ func _wrapped_manhattan_distance(first: Vector2i, second: Vector2i) -> int:
 	var width := MAP[0].length()
 	horizontal_distance = mini(horizontal_distance, width - horizontal_distance)
 	return horizontal_distance + absi(first.y - second.y)
+
+
+func _cosmetic_palette(category: String) -> Dictionary:
+	var manager := get_node_or_null("/root/UnlockManager")
+	if manager == null:
+		return {}
+	var result: Dictionary = manager.call("get_palette", category)
+	return result

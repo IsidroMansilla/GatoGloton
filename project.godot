@@ -21,6 +21,8 @@ config/icon="res://assets/icon.svg"
 GameState="*res://src/autoload/game_state.gd"
 SaveManager="*res://src/autoload/save_manager.gd"
 ProgressionManager="*res://src/autoload/progression_manager.gd"
+AchievementManager="*res://src/autoload/achievement_manager.gd"
+UnlockManager="*res://src/autoload/unlock_manager.gd"
 AudioManager="*res://src/autoload/audio_manager.gd"
 AdsManager="*res://src/autoload/ads_manager.gd"
 

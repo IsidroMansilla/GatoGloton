@@ -26,11 +26,25 @@ el balance de la IA se valida aparte en Android real.
 
 Resultado de referencia actual: `97 passed, 0 failed`.
 
+`progression_test_runner.gd` valida logros y desbloqueos:
+
+- Integridad y cobertura del catalogo de logros.
+- Calculo de progreso por estadistica y record.
+- Integridad del catalogo de cosmeticos y sus paletas.
+- Reglas de desbloqueo por nivel, partidas, logros y niveles completados.
+- API publica de `AchievementManager` y `UnlockManager`.
+
+Resultado de referencia actual: `45 passed, 0 failed`.
+
 En PowerShell, usa `Start-Process` para obtener correctamente el codigo de salida con el ejecutable de Godot instalado en este proyecto. El runner de guardado necesita `--quit-after` para cerrar el proceso de forma fiable tras escribir en disco:
 
 ```powershell
 $godot = "C:\ruta\Godot_v4.7.2-stable_mono_win64.exe"
-$scripts = @("res://tests/test_runner.gd", "res://tests/save_test_runner.gd")
+$scripts = @(
+    "res://tests/test_runner.gd",
+    "res://tests/save_test_runner.gd",
+    "res://tests/progression_test_runner.gd"
+)
 foreach ($script in $scripts) {
     $process = Start-Process -FilePath $godot -ArgumentList @(
         "--headless", "--quit-after", "30", "--path", ".", "--script", $script

@@ -10,7 +10,7 @@
 - Plataforma objetivo: Android / Google Play.
 - Orientacion: portrait.
 - Resolucion logica: `360x640`, stretch `canvas_items`.
-- Estado: base jugable completa y guardado ampliado; pendientes balance final, logros y cosméticos.
+- Estado: base jugable completa, guardado ampliado, logros y personalización; pendientes balance final, arte alternativo y publicación.
 
 ## Entorno
 
@@ -32,14 +32,14 @@ export_presets.cfg
 AGENTS.md
 CONTEXTO.md
 OBJETIVOS.md
-src/autoload/               # estado, guardado, progresion, audio y anuncios
+src/autoload/               # estado, guardado, progresion, logros, desbloqueos, audio y anuncios
 src/ads/                    # backends MockAds y AdMob/UMP
-src/game/                   # Main, Maze, Player, RivalCat y menu
-src/data/                   # niveles, mapas y configuracion personalizada
+src/game/                   # Main, Maze, Player, RivalCat, pantallas y menu
+src/data/                   # niveles, mapas, logros, cosmeticos y config personalizada
 assets/fonts/               # Press Start 2P y tema arcade
 assets/maps/                # PNG de referencia de los 30 niveles
 assets/store/               # recursos de Google Play
-tests/                      # runner headless de mapas y pellets
+tests/                      # runners headless de mapas, guardado y progresion
 scripts/                    # build, validacion y renderizado
 android/                    # plantilla de exportacion Android
 ```
@@ -48,7 +48,7 @@ android/                    # plantilla de exportacion Android
 
 ### Bucle jugable
 
-- Menu inicial retro con `INICIAR` y `MODO PERSONALIZADO`.
+- Menu inicial retro con `INICIAR`, `MODO PERSONALIZADO`, `LOGROS` y `PERSONALIZAR`.
 - Movimiento grid-locked por teclado, WASD y swipe.
 - Mapas con paredes de bloques completos y rutas conectadas.
 - Bolas de pelo, power-ups, puntuacion, vidas y respawn seguro.
@@ -76,6 +76,18 @@ android/                    # plantilla de exportacion Android
 - Las partidas personalizadas no alteran estadisticas, records, logros ni desbloqueos.
 - Save ausente, corrupto o de version futura se maneja sin romper el arranque.
 
+### Logros y desbloqueos
+
+- Catalogo de 17 logros basado en niveles, partidas, puntuacion, pellets,
+  power-ups, rivales y niveles completados sin dano.
+- Catalogo de 9 cosmeticos en tres categorias: gato, rivales y mapa.
+- Los cosmeticos aplican paletas propias al jugador, a los rivales y al laberinto.
+- Evaluacion de logros y desbloqueos solo durante partidas progresivas.
+- Notificacion retro de desbloqueo durante la partida.
+- Pantalla de logros con progreso por objetivo y pantalla de personalizacion
+  con estado bloqueado, disponible o equipado.
+- La seleccion de cosmeticos se guarda en `user://save.json`.
+
 ### Modo personalizado
 
 - Seleccion limitado al nivel maximo progresivo desbloqueado.
@@ -102,7 +114,11 @@ El runner `tests/save_test_runner.gd` valida guardado, migraciones v1/v2, archiv
 ausente, corrupto, version futura, tipos invalidos, escritura fallida y el
 aislamiento de las partidas personalizadas.
 
-Resultado validado actualmente: `380 passed, 0 failed` en mapas y `97 passed, 0 failed` en guardado.
+El runner `tests/progression_test_runner.gd` valida los catalogos de logros y
+cosmeticos, el calculo de progreso y las reglas de desbloqueo.
+
+Resultado validado actualmente: `380 passed, 0 failed` en mapas, `97 passed, 0 failed`
+en guardado y `45 passed, 0 failed` en progresion.
 
 Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 `Start-Process -Wait -PassThru`, porque el ejecutable Mono puede dejar
@@ -112,7 +128,7 @@ Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 
 - Balancear la progresion completa jugando niveles iniciales, intermedios y finales.
 - Probar rendimiento del nivel 30 en Android.
-- Implementar `AchievementManager`, `UnlockManager` y personalizacion.
+- Ampliar estilos alternativos de arte y audio (Fase 9).
 - Generar AAB release, completar Play Console y realizar closed testing 12/14.
 
 ## Reglas de trabajo

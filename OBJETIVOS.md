@@ -281,15 +281,15 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 
 ### Fase 8: Logros y desbloqueos
 
-- [ ] Crear `AchievementManager`.
-- [ ] Crear `UnlockManager`.
-- [ ] Crear catalogo de logros.
-- [ ] Crear catalogo de cosmeticos.
-- [ ] Evaluar logros solo durante partidas progresivas.
-- [ ] Desbloquear contenido segun partidas y nivel alcanzado.
-- [ ] Mostrar notificacion de desbloqueo.
-- [ ] Crear pantalla de logros.
-- [ ] Crear pantalla de personalizacion.
+- [x] Crear `AchievementManager`.
+- [x] Crear `UnlockManager`.
+- [x] Crear catalogo de logros.
+- [x] Crear catalogo de cosmeticos.
+- [x] Evaluar logros solo durante partidas progresivas.
+- [x] Desbloquear contenido segun partidas y nivel alcanzado.
+- [x] Mostrar notificacion de desbloqueo.
+- [x] Crear pantalla de logros.
+- [x] Crear pantalla de personalizacion.
 
 ### Fase 9: Contenido visual y sonoro
 
