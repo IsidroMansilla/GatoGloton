@@ -28,6 +28,8 @@ var _rivals: Array[RivalCat] = []
 var _continue_used: bool = false
 var _waiting_reward: bool = false
 var _is_custom_game: bool = false
+var _run_finished_counted: bool = false
+var _level_lives_lost: int = 0
 var _custom_config: CustomGameConfig
 var _custom_panel: Control
 var _custom_level: HSlider
@@ -78,11 +80,13 @@ func _start_game() -> void:
 	_mode = GameMode.PLAYING
 	GameState.reset_run()
 	GameState.is_custom_game = _is_custom_game
-	if not _is_custom_game:
-		ProgressionManager.start_run()
 	_continue_used = false
 	_waiting_reward = false
+	_run_finished_counted = false
 	_resume_button.disabled = false
+	if not _is_custom_game:
+		ProgressionManager.start_run()
+		SaveManager.record_run_started()
 	_start_current_level()
 
 
@@ -96,6 +100,7 @@ func _start_current_level() -> void:
 		_mode = GameMode.MENU
 		return
 	_mode = GameMode.PLAYING
+	_level_lives_lost = 0
 	_maze.configure_map(MAZE_CATALOG.get_map(_level_config.map_id, GameState.level))
 	_maze.reset_pellets(_maze.player_spawn_cell, _level_config.power_up_count)
 	_maze.visible = true
@@ -117,11 +122,13 @@ func _start_current_level() -> void:
 
 func _on_pellet_collected(points: int) -> void:
 	GameState.add_score(points)
+	SaveManager.record_pellet_collected(_is_custom_game)
 	AudioManager.play_sfx("pellet")
 	_update_status()
 
 
 func _on_power_pellet_collected() -> void:
+	SaveManager.record_power_pellet_collected(_is_custom_game)
 	for rival in _rivals:
 		if rival.visible:
 			rival.set_frightened(8.0)
@@ -131,6 +138,7 @@ func _on_power_pellet_collected() -> void:
 
 func _on_rival_eaten() -> void:
 	GameState.add_score(200)
+	SaveManager.record_rival_eaten(_is_custom_game)
 	AudioManager.play_sfx("eat")
 	_update_status()
 
@@ -144,16 +152,20 @@ func _on_level_completed() -> void:
 	if _is_custom_game:
 		_show_result_overlay("PARTIDA COMPLETADA", "Mapa personalizado superado\nPuntos: %d" % GameState.score)
 		return
+	SaveManager.record_level_completed(false, _level_lives_lost == 0)
 	if ProgressionManager.complete_current_level():
 		_show_result_overlay("NIVEL %d COMPLETO" % completed_level, "Preparando nivel %d..." % GameState.level)
 		_continue_to_next_level()
 	else:
+		SaveManager.record_run_won()
 		_show_result_overlay("JUEGO COMPLETADO", "Has superado los 30 niveles\nPuntos: %d" % GameState.score)
 
 
 func _on_player_hit() -> void:
 	if _mode != GameMode.PLAYING:
 		return
+	_level_lives_lost += 1
+	SaveManager.record_life_lost(_is_custom_game)
 	if GameState.lose_life():
 		_mode = GameMode.GAME_OVER
 		_set_game_physics(false)
@@ -213,6 +225,8 @@ func _resume_game() -> void:
 
 
 func _restart_game() -> void:
+	if _mode == GameMode.GAME_OVER:
+		_finish_run_if_needed()
 	_pause_overlay.visible = false
 	_mode = GameMode.MENU
 	_start_game()
@@ -279,7 +293,17 @@ func _on_rewarded_failed(reason: String) -> void:
 	push_warning("No se pudo continuar con anuncio: %s" % reason)
 
 
+func _finish_run_if_needed() -> void:
+	if _is_custom_game or _run_finished_counted:
+		return
+	_run_finished_counted = true
+	SaveManager.record_run_finished()
+
+
 func _return_to_menu() -> void:
+	if _mode == GameMode.GAME_OVER:
+		_finish_run_if_needed()
+	SaveManager.flush()
 	_set_game_physics(false)
 	_mode = GameMode.MENU
 	_maze.visible = false
@@ -304,13 +328,24 @@ func _open_custom_menu() -> void:
 	_menu.visible = false
 	var max_level := maxi(1, SaveManager.highest_level)
 	_custom_level.max_value = max_level
-	_custom_level.value = max_level
-	var base_config := LEVEL_CATALOG.get_level(max_level)
-	_custom_player_speed.value = base_config.player_speed
-	_custom_rival_speed.value = base_config.rival_speed
-	_custom_rival_count.value = base_config.rival_count
-	_custom_difficulty.value = base_config.map_difficulty
-	_custom_power_ups.value = base_config.power_up_count
+	var saved := SaveManager.get_last_custom_config()
+	var chosen_level := max_level
+	if not saved.is_empty():
+		chosen_level = clampi(int(saved.get("level_number", max_level)), 1, max_level)
+	_custom_level.value = chosen_level
+	var base_config := LEVEL_CATALOG.get_level(chosen_level)
+	if saved.is_empty():
+		_custom_player_speed.value = base_config.player_speed
+		_custom_rival_speed.value = base_config.rival_speed
+		_custom_rival_count.value = base_config.rival_count
+		_custom_difficulty.value = base_config.map_difficulty
+		_custom_power_ups.value = base_config.power_up_count
+	else:
+		_custom_player_speed.value = clampf(float(saved.get("player_speed", base_config.player_speed)), GameLimits.MIN_PLAYER_SPEED, GameLimits.MAX_PLAYER_SPEED)
+		_custom_rival_speed.value = clampf(float(saved.get("rival_speed", base_config.rival_speed)), GameLimits.MIN_RIVAL_SPEED, GameLimits.MAX_RIVAL_SPEED)
+		_custom_rival_count.value = clampi(int(saved.get("rival_count", base_config.rival_count)), GameLimits.MIN_RIVAL_COUNT, GameLimits.MAX_RIVAL_COUNT)
+		_custom_difficulty.value = clampf(float(saved.get("map_difficulty", base_config.map_difficulty)), GameLimits.MIN_MAP_DIFFICULTY, GameLimits.MAX_MAP_DIFFICULTY)
+		_custom_power_ups.value = clampi(int(saved.get("power_up_count", base_config.power_up_count)), GameLimits.MIN_POWER_UP_COUNT, GameLimits.MAX_POWER_UP_COUNT)
 	_refresh_custom_values()
 
 
@@ -326,6 +361,7 @@ func _start_custom_game() -> void:
 	if not errors.is_empty():
 		_refresh_custom_values("CONFIGURACION INVALIDA")
 		return
+	SaveManager.record_custom_config(_custom_config)
 	_is_custom_game = true
 	_custom_panel.visible = false
 	_mode = GameMode.MENU

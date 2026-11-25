@@ -269,15 +269,15 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 ### Fase 7: Guardado y estadisticas
 
 - [x] Versionar el formato de `SaveManager`.
-- [ ] Guardar partidas iniciadas y completadas.
+- [x] Guardar partidas iniciadas y completadas.
 - [x] Guardar nivel maximo.
 - [x] Guardar mejor puntuacion.
-- [ ] Guardar progreso de logros.
-- [ ] Guardar desbloqueos.
-- [ ] Guardar cosmeticos seleccionados.
-- [ ] Guardar la ultima configuracion personalizada.
-- [ ] Implementar migraciones de datos.
-- [ ] Probar archivo inexistente, corrupto y de versiones anteriores.
+- [x] Guardar progreso de logros.
+- [x] Guardar desbloqueos.
+- [x] Guardar cosmeticos seleccionados.
+- [x] Guardar la ultima configuracion personalizada.
+- [x] Implementar migraciones de datos.
+- [x] Probar archivo inexistente, corrupto y de versiones anteriores.
 
 ### Fase 8: Logros y desbloqueos
 
@@ -311,7 +311,7 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 ### Fase 10: Publicacion y calidad
 
 - [x] Ejecutar importacion headless sin errores.
-- [ ] Ejecutar pruebas de logica y guardado.
+- [x] Ejecutar pruebas de logica y guardado.
 - [x] Probar menu, personalizado, pausa y game over en Android real.
 - [ ] Probar rendimiento con el nivel 30.
 - [ ] Verificar ausencia de crashes en logcat.

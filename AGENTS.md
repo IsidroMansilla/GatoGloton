@@ -74,7 +74,7 @@ scripts/                    # build, validacion y renderizado
 
 - **Autoloads**
   - `GameState`: score, vidas, nivel, modo personalizado y senales de cambio.
-  - `SaveManager`: JSON versionado en `user://save.json`, high score y nivel maximo.
+  - `SaveManager`: JSON versionado v3 en `user://save.json`, record, nivel maximo, estadisticas, logros/desbloqueos/cosmeticos y ultima config personalizada.
   - `ProgressionManager`: catalogo y avance de los 30 niveles progresivos.
   - `AudioManager`: volumen/mute, reproduccion de SFX y musica.
   - `AdsManager`: fachada sobre `AdsBackend`; elige `MockAds` en desktop/editor y `AdMobBackend` en Android.
@@ -124,7 +124,7 @@ scripts/                    # build, validacion y renderizado
 
 - `godot --headless --path . --import` termina sin errores.
 - La app arranca en desktop y en un Android real sin crashes.
-- `tests/test_runner.gd` en verde: valida los 30 mapas y la cobertura de pellets.
+- `tests/test_runner.gd` y `tests/save_test_runner.gd` en verde: validan los 30 mapas, la cobertura de pellets, el guardado y las migraciones.
 - Sin secretos ni arte con licencia incompatible en el diff.
 - Diff pequeno, con mensaje de commit claro.
 

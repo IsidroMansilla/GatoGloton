@@ -10,7 +10,7 @@
 - Plataforma objetivo: Android / Google Play.
 - Orientacion: portrait.
 - Resolucion logica: `360x640`, stretch `canvas_items`.
-- Estado: base jugable completa; pendientes balance final, guardado ampliado, logros y cosméticos.
+- Estado: base jugable completa y guardado ampliado; pendientes balance final, logros y cosméticos.
 
 ## Entorno
 
@@ -65,6 +65,17 @@ android/                    # plantilla de exportacion Android
 - Velocidad, rivales, power-ups y agresividad de IA configurables por nivel.
 - Nivel maximo guardado en `user://save.json`.
 
+### Guardado y estadisticas
+
+- Esquema versionado v3 compatible con saves v1, v2 y sin version.
+- Conserva record y nivel maximo.
+- Guarda partidas iniciadas, terminadas por game over y ganadas, niveles
+  completados, niveles sin dano, pellets, power-ups, rivales comidos y vidas perdidas.
+- Prepara persistencia de logros, desbloqueos y cosmeticos seleccionados.
+- Guarda la ultima configuracion del modo personalizado y la reutiliza al abrirlo.
+- Las partidas personalizadas no alteran estadisticas, records, logros ni desbloqueos.
+- Save ausente, corrupto o de version futura se maneja sin romper el arranque.
+
 ### Modo personalizado
 
 - Seleccion limitado al nivel maximo progresivo desbloqueado.
@@ -87,7 +98,11 @@ El runner `tests/test_runner.gd` valida los 30 niveles sin depender de Android n
 de la IA. Comprueba configuracion, dimensiones, conectividad, ruta de cobertura,
 recogida de pellets y spawns seguros.
 
-Resultado validado actualmente: `380 passed, 0 failed`.
+El runner `tests/save_test_runner.gd` valida guardado, migraciones v1/v2, archivo
+ausente, corrupto, version futura, tipos invalidos, escritura fallida y el
+aislamiento de las partidas personalizadas.
+
+Resultado validado actualmente: `380 passed, 0 failed` en mapas y `97 passed, 0 failed` en guardado.
 
 Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 `Start-Process -Wait -PassThru`, porque el ejecutable Mono puede dejar
@@ -97,7 +112,6 @@ Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 
 - Balancear la progresion completa jugando niveles iniciales, intermedios y finales.
 - Probar rendimiento del nivel 30 en Android.
-- Ampliar `SaveManager` con estadisticas, logros y cosmeticos.
 - Implementar `AchievementManager`, `UnlockManager` y personalizacion.
 - Generar AAB release, completar Play Console y realizar closed testing 12/14.
 
