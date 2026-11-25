@@ -20,7 +20,14 @@ func _ready() -> void:
 
 
 func show_rewarded() -> void:
+	if backend == null:
+		rewarded_failed.emit("backend_not_ready")
+		return
 	backend.show_rewarded()
+
+
+func is_rewarded_ready() -> bool:
+	return backend != null and backend.is_ready()
 
 
 func show_interstitial() -> void:

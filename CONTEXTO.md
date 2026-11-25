@@ -7,12 +7,12 @@
 - Repositorio remoto: `https://github.com/IsidroMansilla/GatoGloton.git`.
 - Motor: Godot `4.7.2.stable.mono`.
 - Lenguaje: GDScript 4 tipado.
-- Desarrollo asistido principalmente con opencode.
 - Plataforma objetivo: Android / Google Play.
 - Orientacion: portrait.
 - Resolucion logica: `360x640`, stretch `canvas_items`.
+- Estado: base jugable completa; pendientes balance final, guardado ampliado, logros y cosméticos.
 
-## Entorno configurado
+## Entorno
 
 - Godot: `C:\Users\Isidro\Desktop\Godot_v4.7.2-stable_mono_win64`.
 - JDK 17: `C:\Program Files\Java\jdk-17`.
@@ -22,7 +22,7 @@
 - Arquitectura: `arm64-v8a`.
 - Export templates Mono 4.7.2 instalados.
 - Android build template instalado en `android\build`.
-- Cuenta/telefono Android conectados mediante ADB para pruebas.
+- APK debug probado en un Redmi Note 9 Pro conectado por ADB.
 
 ## Estructura importante
 
@@ -32,61 +32,74 @@ export_presets.cfg
 AGENTS.md
 CONTEXTO.md
 OBJETIVOS.md
-src/autoload/
-src/ads/
-src/game/main.gd
-src/game/main.tscn
-src/game/maze.gd
-src/game/player.gd
-scripts/
-assets/
-tests/unit/
-android/
+src/autoload/               # estado, guardado, progresion, audio y anuncios
+src/ads/                    # backends MockAds y AdMob/UMP
+src/game/                   # Main, Maze, Player, RivalCat y menu
+src/data/                   # niveles, mapas y configuracion personalizada
+assets/fonts/               # Press Start 2P y tema arcade
+assets/maps/                # PNG de referencia de los 30 niveles
+assets/store/               # recursos de Google Play
+tests/                      # runner headless de mapas y pellets
+scripts/                    # build, validacion y renderizado
+android/                    # plantilla de exportacion Android
 ```
 
 ## Funcionalidad implementada
 
-### Scaffold M0
+### Bucle jugable
 
-- Proyecto Godot funcional.
-- Autoloads:
-  - `GameState` para score, vidas y nivel.
-  - `SaveManager` para high score en `user://save.json`.
-  - `AudioManager` para mute y audio futuro.
-  - `AdsManager` con `MockAds` en desktop y `AdMobBackend` pendiente.
-- Export presets para APK Android y AAB Google Play.
-- Scripts de entorno, build, keystore e instalacion del APK.
-- Icono SVG original.
-- Workflow CI Android inicial.
+- Menu inicial retro con `INICIAR` y `MODO PERSONALIZADO`.
+- Movimiento grid-locked por teclado, WASD y swipe.
+- Mapas con paredes de bloques completos y rutas conectadas.
+- Bolas de pelo, power-ups, puntuacion, vidas y respawn seguro.
+- Rivales dinamicos de 1 a 4 segun el nivel.
+- IA con estados `Scatter`, `Chase` y `Frightened`.
+- Pausa con `CONTINUAR`, `REINICIAR` y `SALIR`.
+- Game over con anuncio recompensado, reinicio y vuelta al menu.
 
-### M1
+### Progresion
 
-- Laberinto propio de 21x19 casillas.
-- Paredes azules y bolas de pelo visuales.
-- Movimiento grid-locked manual.
-- Bloqueo contra paredes.
-- Wrap horizontal en los extremos del laberinto.
-- Buffer de direccion de 150 ms.
-- Controles de teclado: flechas y WASD.
-- Controles tactiles: swipe.
-- Gato vectorial dibujado desde GDScript.
-- APK debug probado en un telefono Android real.
+- 30 niveles progresivos.
+- Mapas de `13x11` a `25x21` celdas.
+- Tamano de celda adaptativo para mantener la visibilidad en portrait.
+- Velocidad, rivales, power-ups y agresividad de IA configurables por nivel.
+- Nivel maximo guardado en `user://save.json`.
 
-## Decisiones y problemas resueltos
+### Modo personalizado
 
-- Se eligio Godot + GDScript porque los archivos `.gd`, `.tscn` y `.tres` son faciles de generar y revisar con IA.
-- El editor Mono funciona, pero el cierre headless del export puede quedarse abierto despues de generar el APK. La exportacion se controla detectando que el APK este completo.
-- `adb devices` necesita un telefono autorizado con Depuracion USB.
-- El fondo era un `ColorRect` dentro de un `CanvasLayer` y tapaba visualmente el laberinto. Se oculta al entrar al gameplay.
-- El redibujado del laberinto se fuerza al mostrarlo con `queue_redraw()`.
-- La aplicacion actualmente entra directamente al laberinto para poder validar M1 sin bloquearse en el menu.
+- Seleccion limitado al nivel maximo progresivo desbloqueado.
+- Configuracion de velocidad del jugador, velocidad y cantidad de rivales,
+  dificultad de IA y power-ups.
+- No aumenta récord, nivel maximo, logros ni desbloqueos.
 
-## Estado actual de ejecucion
+### Interfaz y arte
 
-- Al abrir la app aparece directamente el laberinto.
-- El jugador puede moverse deslizando el dedo.
-- El menu de inicio esta temporalmente desactivado.
-- El siguiente objetivo es restaurar el menu y hacer que el boton `INICIAR` lleve al laberinto.
+- Fuente `PressStart2P-Regular.ttf` bajo OFL 1.1.
+- Tema arcade compartido en `assets/fonts/arcade_theme.tres`.
+- HUD en tabla horizontal con nivel, IA, puntos y vidas.
+- Menus de pausa, game over y modo personalizado con tarjetas retro.
+- Laberinto centrado horizontal y verticalmente.
+- Arte vectorial original sin marcas ni recursos de terceros incompatibles.
+
+## Pruebas
+
+El runner `tests/test_runner.gd` valida los 30 niveles sin depender de Android ni
+de la IA. Comprueba configuracion, dimensiones, conectividad, ruta de cobertura,
+recogida de pellets y spawns seguros.
+
+Resultado validado actualmente: `380 passed, 0 failed`.
+
+Para obtener un codigo de salida fiable en PowerShell se recomienda usar
+`Start-Process -Wait -PassThru`, porque el ejecutable Mono puede dejar
+`$LASTEXITCODE` vacio aunque termine correctamente.
+
+## Pendientes principales
+
+- Balancear la progresion completa jugando niveles iniciales, intermedios y finales.
+- Probar rendimiento del nivel 30 en Android.
+- Ampliar `SaveManager` con estadisticas, logros y cosmeticos.
+- Implementar `AchievementManager`, `UnlockManager` y personalizacion.
+- Generar AAB release, completar Play Console y realizar closed testing 12/14.
 
 ## Reglas de trabajo
 

@@ -20,6 +20,7 @@ config/icon="res://assets/icon.svg"
 
 GameState="*res://src/autoload/game_state.gd"
 SaveManager="*res://src/autoload/save_manager.gd"
+ProgressionManager="*res://src/autoload/progression_manager.gd"
 AudioManager="*res://src/autoload/audio_manager.gd"
 AdsManager="*res://src/autoload/ads_manager.gd"
 
@@ -46,3 +47,4 @@ pointing/emulate_touch_from_mouse=true
 
 renderer/rendering_method="mobile"
 textures/vram_compression/import_etc2_astc=true
+environment/defaults/default_clear_color=Color(0.027451, 0.031373, 0.090196, 1)

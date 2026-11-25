@@ -1,110 +1,362 @@
 # Objetivos del proyecto
 
-## Objetivo principal
+## 1. Objetivo final
 
-Crear y publicar en Google Play un juego arcade 2D original, desarrollado principalmente con ayuda de IA, monetizado inicialmente con anuncios.
+Crear y publicar en Google Play un arcade 2D original de laberintos para Android.
 
-## Estado de objetivos
+El jugador controla un gato que recoge bolas de pelo, evita gatos rivales y utiliza power-ups. El juego tendra dos modos, dificultad progresiva, partidas personalizadas, logros, desbloqueos y personalizacion visual.
+
+El producto final debe ser jugable con controles tactiles, funcionar en portrait, mantener una buena visibilidad en pantallas pequenas y no depender de propiedad intelectual de terceros.
+
+## 2. Modos de juego
+
+### 2.1. Modo Progresion
+
+El jugador empieza en el nivel 1 y avanza hasta un maximo inicial de 30 niveles.
+
+- Los niveles 1-10 forman el bloque de aprendizaje.
+- Los niveles 11-20 forman el bloque avanzado.
+- Los niveles 21-30 forman el bloque de dificultad maxima.
+- La dificultad aumenta de forma gradual y por bloques.
+- Cada partida termina al perder todas las vidas.
+- El nivel maximo alcanzado se guarda de forma persistente.
+- Solo este modo genera logros, desbloqueos y progreso principal.
+
+La dificultad puede aumentar mediante:
+
+- Numero de gatos rivales.
+- Velocidad del jugador.
+- Velocidad de los rivales.
+- Diferencia de velocidad entre jugador y rivales.
+- Complejidad del mapa.
+- Tamano del mapa dentro de limites de visibilidad.
+- Dificultad de la inteligencia artificial.
+- Distribucion y frecuencia de power-ups.
+
+Ninguna variable debe superar limites que hagan el juego injusto, ilegible o dificil de controlar mediante pantalla tactil.
+
+### 2.2. Modo Personalizado
+
+El jugador puede crear partidas personalizadas usando cualquier nivel que haya desbloqueado en el modo progresion.
+
+Puede configurar:
+
+- Velocidad del jugador.
+- Velocidad y numero de rivales.
+- Tamano y dificultad del mapa.
+- Dificultad de la inteligencia artificial.
+- Numero y frecuencia de power-ups.
+- Otras variables de balance que se incorporen posteriormente.
+
+Las partidas personalizadas:
+
+- No aumentan el nivel maximo del modo progresion.
+- No conceden logros.
+- No desbloquean cosmeticos.
+- No generan recompensas de progreso.
+- Sirven para practicar y experimentar.
+
+## 3. Reglas de una partida
+
+- Una partida finaliza al perder todas las vidas.
+- Al perder una vida, el jugador permanece en el nivel actual.
+- El nivel se reinicia completamente.
+- El mapa conserva su configuracion.
+- El jugador reaparece en una celda transitable aleatoria y valida.
+- El punto de reaparicion debe tener una ruta de salida.
+- El punto de reaparicion no puede estar ocupado ni demasiado cerca de un rival.
+- El jugador recibe un breve periodo de invulnerabilidad tras reaparecer.
+- La puntuacion y el nivel de la partida se conservan al perder una vida.
+
+## 4. Pantallas y flujo principal
+
+El menu inicial debe incluir:
+
+- Boton `INICIAR` para el modo progresion.
+- Boton `MODO PERSONALIZADO`.
+- Boton `PERSONALIZAR`.
+- Boton `LOGROS`.
+- Boton `AJUSTES`.
+- Nivel maximo alcanzado.
+- Mejor puntuacion.
+- Resumen de desbloqueos recientes.
+
+El flujo del modo progresion sera:
+
+1. Menu inicial.
+2. Seleccion de modo progresion.
+3. Inicio de una nueva partida en el nivel 1.
+4. Juego y avance de nivel.
+5. Pantalla de nivel completado.
+6. Siguiente nivel o game over.
+
+El flujo del modo personalizado sera:
+
+1. Menu inicial.
+2. Seleccion de modo personalizado.
+3. Seleccion de nivel desbloqueado.
+4. Configuracion de variables.
+5. Validacion de limites.
+6. Inicio de la partida personalizada.
+
+## 5. Pantalla Game Over
+
+Cuando el jugador pierde todas las vidas se muestra una pantalla `GAME OVER` con estas opciones:
+
+### Continuar con anuncio
+
+- Mostrar un anuncio recompensado.
+- Conceder una vida adicional.
+- Continuar en el nivel actual.
+- Reiniciar completamente el nivel actual.
+- Conservar la puntuacion y el nivel alcanzado.
+- Permitir esta opcion una sola vez por partida.
+- Deshabilitar la opcion si el anuncio no esta disponible.
+
+### Volver al menu
+
+- Guardar estadisticas, puntuacion y nivel maximo.
+- Finalizar la partida actual.
+- Volver al menu inicial.
+
+### Empezar desde el nivel 1
+
+- Guardar la partida anterior.
+- Finalizar la partida actual.
+- Iniciar una nueva partida progresiva desde el nivel 1.
+
+## 6. Mapas
+
+Los mapas se generan de forma controlada con un algoritmo de laberinto y una semilla determinista por nivel. Esto permite 30 geometrias distintas, reproducibles y validadas sin depender de mapas pintados a mano.
+
+- Definir al menos 10 variantes base de mapa.
+- Asignar mapas y variaciones a los 30 niveles.
+- Mantener rutas de escape razonables.
+- Definir celdas validas de inicio y reaparicion.
+- Garantizar que las zonas transitables sean alcanzables.
+- Mantener la geometria visible en portrait.
+- Probar cada mapa con diferentes cantidades y velocidades de rivales.
+- Crear estilos visuales desbloqueables sin alterar necesariamente la geometria.
+- Hacer crecer el mapa proporcionalmente de 13x11 celdas en el nivel 1 a 25x21 en el nivel 30.
+- Ajustar automaticamente el tamano de las celdas para conservar la visibilidad en portrait.
+
+## 7. Logros
+
+Los logros solo se pueden conseguir en el modo progresion.
+
+Objetivos iniciales de logros:
+
+- Alcanzar niveles concretos.
+- Completar partidas.
+- Jugar un numero determinado de partidas.
+- Completar un nivel sin perder vidas.
+- Obtener determinadas puntuaciones.
+- Recoger power-ups concretos.
+- Superar grupos de niveles.
+- Llegar al nivel 30.
+
+Cada logro tendra:
+
+- Identificador estable.
+- Nombre.
+- Descripcion.
+- Condicion.
+- Progreso actual.
+- Estado completado.
+- Recompensa opcional.
+
+## 8. Desbloqueos y personalizacion
+
+El jugador podra personalizar:
+
+- Estilo del gato del jugador.
+- Estilo de los gatos rivales.
+- Estilo del mapa.
+- Estilo de paredes y fondo.
+- Estilo de las bolas de pelo.
+- Estilo de los power-ups.
+- Efectos visuales.
+- Efectos de sonido.
+- Musica.
+- Animaciones.
+
+Los desbloqueos dependeran de partidas y niveles alcanzados en el modo progresion.
+
+- Jugar un numero de partidas puede desbloquear contenido.
+- Completar partidas puede desbloquear contenido.
+- Alcanzar niveles concretos puede desbloquear contenido.
+- Conseguir puntuaciones concretas puede desbloquear contenido.
+- Las partidas personalizadas no cuentan para estos requisitos.
+- Los cosmeticos no proporcionaran ventajas de gameplay.
+
+Todo contenido desbloqueable tendra un identificador, categoria, requisito, recurso visual o sonoro y estado guardado.
+
+## 9. Objetivos tecnicos ordenados
+
+### Fase 0: Base del proyecto
 
 - [x] Crear el proyecto Godot.
 - [x] Configurar exportacion Android.
 - [x] Configurar APK debug e instalacion mediante ADB.
 - [x] Crear un laberinto original.
 - [x] Crear movimiento grid-locked.
-- [x] Añadir control por teclado y swipe.
+- [x] Anadir control por teclado y swipe.
 - [x] Probar el APK en un telefono Android real.
+
+### Fase 1: Bucle jugable base
+
 - [x] Crear menu de inicio.
-- [x] Añadir boton `INICIAR`.
-- [x] Hacer que `INICIAR` oculte el menu y muestre el laberinto.
-- [x] Añadir pellets coleccionables reales.
-- [x] Añadir score por pellet.
-- [x] Añadir vidas y respawn.
-- [x] Añadir condicion de nivel completado.
-- [x] Añadir gatos rivales con IA.
-- [x] Añadir power-up y modo vulnerable.
-- [x] Añadir menu de pausa y game over.
-- [x] Añadir audio y efectos.
+- [x] Anadir boton de inicio.
+- [x] Mostrar el laberinto al comenzar una partida.
+- [x] Anadir bolas de pelo coleccionables.
+- [x] Anadir puntuacion.
+- [x] Anadir vidas y respawn.
+- [x] Anadir condicion de nivel completado.
+- [x] Anadir gatos rivales con IA inicial.
+- [x] Anadir power-ups y modo vulnerable.
+- [x] Anadir pausa y game over.
+- [x] Anadir audio y efectos.
+
+### Fase 2: Arquitectura de niveles
+
+- [x] Crear `LevelConfig` como recurso de datos.
+- [x] Separar balance y reglas de los scripts de gameplay.
+- [x] Definir los limites de velocidad, rivales y tamano de mapa.
+- [x] Crear la tabla de dificultad de los 30 niveles.
+- [x] Crear validacion de configuraciones de nivel.
+- [x] Crear celdas validas de inicio y reaparicion.
+- [x] Implementar busqueda de reaparicion segura y aleatoria.
+
+### Fase 3: Mapas y progresion de laberintos
+
+- [x] Disenar el generador de mapas y sus variantes base.
+- [x] Generar al menos 10 variantes de mapa para la primera version.
+- [x] Asignar mapas y semillas a los niveles progresivos.
+- [x] Validar conectividad y rutas de escape.
+- [x] Validar visibilidad en portrait.
+- [ ] Probar rendimiento con mapas grandes.
+
+### Fase 4: Modo progresion
+
+- [x] Crear `ProgressionManager`.
+- [x] Iniciar siempre en el nivel 1 cuando corresponda.
+- [x] Aplicar la configuracion de cada nivel.
+- [x] Avanzar al siguiente nivel al completar el mapa.
+- [x] Mostrar nivel y dificultad en el HUD.
+- [x] Implementar los 30 niveles iniciales.
+- [x] Guardar el nivel maximo alcanzado.
+- [ ] Probar el balance completo de la progresion.
+
+### Fase 5: Game over y anuncios
+
+- [x] Implementar las tres acciones de la pantalla game over.
+- [x] Reiniciar el nivel al continuar con una vida adicional.
+- [x] Limitar la continuacion con anuncio a una vez por partida.
+- [x] Deshabilitar continuar cuando no haya anuncio disponible.
 - [x] Integrar AdMob y UMP.
-- [ ] Crear ficha de Google Play.
+- [x] Verificar el flujo de anuncio recompensado en Android.
+
+### Fase 6: Modo personalizado
+
+- [x] Crear `CustomGameConfig`.
+- [x] Crear pantalla de configuracion personalizada.
+- [x] Permitir seleccionar solo niveles progresivos desbloqueados.
+- [x] Anadir controles para las variables de juego.
+- [x] Validar valores minimos y maximos.
+- [x] Mostrar una estimacion de dificultad.
+- [x] Evitar que el modo personalizado genere progreso.
+
+### Fase 7: Guardado y estadisticas
+
+- [x] Versionar el formato de `SaveManager`.
+- [ ] Guardar partidas iniciadas y completadas.
+- [x] Guardar nivel maximo.
+- [x] Guardar mejor puntuacion.
+- [ ] Guardar progreso de logros.
+- [ ] Guardar desbloqueos.
+- [ ] Guardar cosmeticos seleccionados.
+- [ ] Guardar la ultima configuracion personalizada.
+- [ ] Implementar migraciones de datos.
+- [ ] Probar archivo inexistente, corrupto y de versiones anteriores.
+
+### Fase 8: Logros y desbloqueos
+
+- [ ] Crear `AchievementManager`.
+- [ ] Crear `UnlockManager`.
+- [ ] Crear catalogo de logros.
+- [ ] Crear catalogo de cosmeticos.
+- [ ] Evaluar logros solo durante partidas progresivas.
+- [ ] Desbloquear contenido segun partidas y nivel alcanzado.
+- [ ] Mostrar notificacion de desbloqueo.
+- [ ] Crear pantalla de logros.
+- [ ] Crear pantalla de personalizacion.
+
+### Fase 9: Contenido visual y sonoro
+
+- [x] Aplicar `Press Start 2P` a la interfaz.
+- [x] Crear tema arcade compartido.
+- [x] Crear HUD retro en tabla horizontal.
+- [x] Integrar visualmente pausa, game over y modo personalizado.
+- [x] Centrar el laberinto horizontal y verticalmente.
+
+- [ ] Crear estilos alternativos del jugador.
+- [ ] Crear estilos alternativos de rivales.
+- [ ] Crear estilos alternativos de mapas.
+- [ ] Crear estilos alternativos de bolas de pelo y power-ups.
+- [ ] Crear efectos visuales desbloqueables.
+- [ ] Crear efectos de sonido desbloqueables.
+- [ ] Crear musica desbloqueable.
+- [ ] Validar contraste y visibilidad de todos los estilos.
+
+### Fase 10: Publicacion y calidad
+
+- [x] Ejecutar importacion headless sin errores.
+- [ ] Ejecutar pruebas de logica y guardado.
+- [x] Probar menu, personalizado, pausa y game over en Android real.
+- [ ] Probar rendimiento con el nivel 30.
+- [ ] Verificar ausencia de crashes en logcat.
+- [ ] Generar AAB release firmado.
+- [ ] Completar ficha de Google Play.
+- [ ] Completar formularios de privacidad, anuncios, IARC y publico objetivo.
 - [ ] Completar test cerrado con 12 testers durante 14 dias.
 - [ ] Publicar la primera version.
 
-## Objetivo completado: menu de inicio
+## 10. Sistemas previstos
 
-### Resultado esperado
+- `GameState`: estado de la partida actual.
+- `SaveManager`: persistencia versionada.
+- `ProgressionManager`: niveles y dificultad progresiva.
+- `CustomGameConfig`: configuracion personalizada.
+- `AchievementManager`: logros y progreso.
+- `UnlockManager`: requisitos y desbloqueos.
+- `CosmeticManager`: estilos seleccionados.
+- `AudioManager`: musica, efectos y volumen.
+- `AdsManager`: anuncios y recompensas.
+- `Main`: maquina de estados del juego.
+- `Maze`: mapa, pellets, conectividad y celdas validas.
+- `Player`: movimiento, vidas y reaparicion.
+- `RivalCat`: movimiento e inteligencia artificial.
+- `HUD`: puntuacion, nivel, vidas y estado de partida.
 
-Al abrir la aplicacion debe aparecer un menu de inicio con:
+## 11. Definicion de hecho
 
-- Nombre `Gato Gloton`.
-- Boton grande `INICIAR`.
-- Record actual opcional.
-- Fondo visual que no tape el gameplay cuando se inicie.
+- La aplicacion arranca sin errores en desktop y Android.
+- El menu permite acceder a los dos modos.
+- El modo progresion contiene los 30 niveles iniciales.
+- El modo personalizado respeta el nivel maximo desbloqueado.
+- Las partidas personalizadas no alteran logros ni progreso.
+- El respawn siempre usa una posicion valida y segura.
+- El game over ofrece las acciones definidas.
+- El guardado sobrevive al cierre y reapertura de la aplicacion.
+- Los logros y desbloqueos se conceden correctamente.
+- Todos los cosmeticos mantienen la legibilidad del juego.
+- Las pruebas de logica estan en verde.
+- El AAB se puede instalar y probar en Android real.
+- No hay secretos ni recursos con licencias incompatibles.
 
-Al pulsar `INICIAR`:
+## 12. Estado de publicacion
 
-1. Se oculta el menu.
-2. Se muestra el laberinto.
-3. Se muestra el gato.
-4. Se inicializa una partida nueva.
-5. El jugador puede moverse inmediatamente.
-
-### Implementacion prevista
-
-- Mantener `Main` como controlador de estados.
-- Añadir estados `MENU` y `PLAYING`.
-- Crear un `Control` o `CanvasLayer` exclusivo para el menu.
-- Usar un boton Godot con `mouse_filter` correcto.
-- No usar un `ColorRect` opaco por encima del laberinto durante `PLAYING`.
-- Conectar la señal `pressed` del boton a `_start_game()`.
-- Mantener un fallback tactil solo si es necesario y documentarlo.
-- Añadir una prueba manual en Android: abrir → pulsar `INICIAR` → mover por swipe.
-
-### Criterios de aceptacion
-
-- El menu aparece al abrir la app.
-- El laberinto no aparece mientras el menu esta visible.
-- `INICIAR` responde al toque real en el telefono.
-- El laberinto aparece despues del toque.
-- El gato se mueve despues de iniciar.
-- No hay errores `SCRIPT ERROR` ni crashes en logcat.
-- El APK actualizado se instala mediante `scripts\install_debug.ps1`.
-
-## Siguiente objetivo: M2, coleccionables y puntuacion
-
-La base de pellets, puntuacion y deteccion de nivel completado ya esta implementada. Falta continuar con vidas, respawn y la progresion de partida.
-
-## Roadmap posterior
-
-### M2: coleccionables y puntuacion
-
-- Convertir las bolas visuales en pellets reales.
-- Eliminar pellet al tocarlo.
-- Sumar puntos.
-- Mostrar score en HUD.
-- Detectar laberinto completado.
-
-### M3: rivales
-
-- Crear gatos rivales.
-- Estados `Scatter`, `Chase`, `Frightened` y `Eaten`.
-- Target tile por personalidad.
-- Colision jugador/rival.
-
-### M4: partida completa
-
-- Power-up.
-- Vidas.
-- Respawn.
-- Game over.
-- Pausa.
-- Dificultad por nivel.
-
-### M5: monetizacion y publicacion
-
-- Integrar AdMob real.
-- Añadir consentimiento UMP/GDPR.
-- Usar rewarded para continuar.
-- Generar AAB release.
-- Crear ficha Play Store.
-- Test cerrado 12/14.
-- Publicar.
+- [x] Integrar AdMob y UMP.
+- [ ] Crear y revisar ficha de Google Play.
+- [ ] Completar test cerrado con 12 testers durante 14 dias.
+- [ ] Publicar la primera version.

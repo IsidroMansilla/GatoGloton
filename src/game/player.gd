@@ -13,11 +13,14 @@ var queued_direction: Vector2i = Vector2i.RIGHT
 var target_position: Vector2
 var moving: bool = false
 var movement_enabled: bool = true
+var move_speed: float = MOVE_SPEED
 var _buffer_time_left: float = 0.0
 
 
-func configure(world: Maze, start_cell: Vector2i = Vector2i(1, 1)) -> void:
+func configure(world: Maze, start_cell: Vector2i = Vector2i(1, 1), level_config: LevelConfig = null) -> void:
 	maze = world
+	move_speed = level_config.player_speed if level_config != null else MOVE_SPEED
+	scale = Vector2.ONE * (maze.tile_size / Maze.TILE_SIZE)
 	cell = start_cell
 	movement_enabled = true
 	global_position = maze.cell_to_position(cell)
@@ -67,7 +70,7 @@ func _physics_process(delta: float) -> void:
 	if not moving:
 		return
 
-	global_position = global_position.move_toward(target_position, MOVE_SPEED * delta)
+	global_position = global_position.move_toward(target_position, move_speed * delta)
 	if global_position.distance_to(target_position) > 0.01:
 		return
 

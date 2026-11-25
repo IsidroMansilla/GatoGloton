@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://dh7t3u2vucp3q" path="res://src/game/player.gd" id="3_player"]
 [ext_resource type="Script" uid="uid://hoqnhksawdaw" path="res://src/game/arcade_menu.gd" id="4_menu"]
 [ext_resource type="Script" uid="uid://dlkbdhxsae6bu" path="res://src/game/rival_cat.gd" id="5_rival"]
+[ext_resource type="Theme" path="res://assets/fonts/arcade_theme.tres" id="6_theme"]
 
 [sub_resource type="StyleBoxFlat" id="ButtonNormal"]
 bg_color = Color(0.94902, 0.321569, 0.058824, 1)
@@ -44,6 +45,30 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id="StatusPanel"]
+bg_color = Color(0.066667, 0.082353, 0.184314, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.376471, 0.647059, 0.980392, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="PausePanel"]
+bg_color = Color(0.066667, 0.082353, 0.184314, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.94902, 0.321569, 0.058824, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="Main" type="Node2D" unique_id=520017608]
 script = ExtResource("1_main")
 
@@ -67,6 +92,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 script = ExtResource("4_menu")
+theme = ExtResource("6_theme")
 
 [node name="Title" type="Label" parent="UI/Menu" unique_id=1604212522]
 layout_mode = 0
@@ -78,7 +104,7 @@ theme_override_colors/font_color = Color(1, 0.815686, 0.345098, 1)
 theme_override_colors/font_shadow_color = Color(0.94902, 0.321569, 0.058824, 0.8)
 theme_override_constants/shadow_offset_x = 3
 theme_override_constants/shadow_offset_y = 3
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 20
 text = "GATO GLOTON"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -90,7 +116,7 @@ offset_top = 198.0
 offset_right = 320.0
 offset_bottom = 226.0
 theme_override_colors/font_color = Color(0.376471, 0.647059, 0.980392, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 8
 text = "ARCADE DE LABERINTO"
 horizontal_alignment = 1
 
@@ -101,7 +127,7 @@ offset_top = 254.0
 offset_right = 320.0
 offset_bottom = 288.0
 theme_override_colors/font_color = Color(0.992157, 0.921569, 0.54902, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 9
 text = "RECORD  0000"
 horizontal_alignment = 1
 
@@ -114,20 +140,33 @@ offset_bottom = 394.0
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(1, 0.972549, 0.862745, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/pressed = SubResource("ButtonPressed")
 theme_override_styles/hover = SubResource("ButtonHover")
 text = "INICIAR"
 
+[node name="CustomButton" type="Button" parent="UI/Menu"]
+layout_mode = 0
+offset_left = 62.0
+offset_top = 402.0
+offset_right = 298.0
+offset_bottom = 452.0
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+theme_override_styles/hover = SubResource("ButtonHover")
+text = "MODO PERSONALIZADO"
+
 [node name="Hint" type="Label" parent="UI/Menu" unique_id=655905013]
 layout_mode = 0
 offset_left = 38.0
-offset_top = 424.0
+offset_top = 466.0
 offset_right = 322.0
-offset_bottom = 466.0
+offset_bottom = 508.0
 theme_override_colors/font_color = Color(0.65098, 0.67451, 0.792157, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 8
 text = "COME. ESCAPA. REPITE.
 Desliza para moverte"
 horizontal_alignment = 1
@@ -139,22 +178,32 @@ offset_top = 566.0
 offset_right = 330.0
 offset_bottom = 592.0
 theme_override_colors/font_color = Color(0.376471, 0.647059, 0.980392, 0.75)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 7
 text = "INSERT COIN  *  1 JUGADOR"
 horizontal_alignment = 1
 
 [node name="Status" type="Label" parent="UI" unique_id=1499719314]
 visible = false
-offset_left = 20.0
-offset_top = 18.0
-offset_right = 340.0
-offset_bottom = 62.0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 336.0
+offset_bottom = 72.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 8
 text = "Puntos: 0 | Record: 0"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
+theme = ExtResource("6_theme")
+
+[node name="StatusFrame" type="Panel" parent="UI"]
+visible = false
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 348.0
+offset_bottom = 80.0
+theme_override_styles/panel = SubResource("StatusPanel")
+z_index = -1
 
 [node name="PauseButton" type="Button" parent="UI"]
 visible = false
@@ -163,8 +212,10 @@ offset_top = 14.0
 offset_right = 344.0
 offset_bottom = 54.0
 mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 11
 text = "II"
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonPressed")
 
 [node name="PauseOverlay" type="Control" parent="UI"]
 visible = false
@@ -175,6 +226,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
+theme = ExtResource("6_theme")
 
 [node name="Shade" type="ColorRect" parent="UI/PauseOverlay"]
 layout_mode = 1
@@ -186,6 +238,15 @@ grow_vertical = 2
 mouse_filter = 1
 color = Color(0.027451, 0.031373, 0.090196, 0.9)
 
+[node name="Card" type="Panel" parent="UI/PauseOverlay"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 150.0
+offset_right = 338.0
+offset_bottom = 548.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("PausePanel")
+
 [node name="Title" type="Label" parent="UI/PauseOverlay"]
 layout_mode = 0
 offset_left = 30.0
@@ -193,7 +254,7 @@ offset_top = 198.0
 offset_right = 330.0
 offset_bottom = 248.0
 theme_override_colors/font_color = Color(1, 0.815686, 0.345098, 1)
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 17
 text = "PAUSA"
 horizontal_alignment = 1
 
@@ -204,7 +265,7 @@ offset_top = 258.0
 offset_right = 330.0
 offset_bottom = 302.0
 theme_override_colors/font_color = Color(0.65098, 0.67451, 0.792157, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 8
 text = "La partida esta detenida"
 horizontal_alignment = 1
 
@@ -214,8 +275,10 @@ offset_left = 72.0
 offset_top = 334.0
 offset_right = 288.0
 offset_bottom = 390.0
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 10
 text = "CONTINUAR"
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonPressed")
 
 [node name="RestartButton" type="Button" parent="UI/PauseOverlay"]
 layout_mode = 0
@@ -223,5 +286,18 @@ offset_left = 72.0
 offset_top = 404.0
 offset_right = 288.0
 offset_bottom = 460.0
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 10
 text = "REINICIAR"
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+
+[node name="MenuButton" type="Button" parent="UI/PauseOverlay"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 474.0
+offset_right = 288.0
+offset_bottom = 530.0
+theme_override_font_sizes/font_size = 9
+text = "VOLVER AL MENU"
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonPressed")

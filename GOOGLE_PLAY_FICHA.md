@@ -50,10 +50,10 @@ reflejos, rutas cortas y decisiones rapidas.`
 
 - Icono de aplicacion: disponible en `assets/icon.svg`, 512x512.
 - Grafico de funciones: disponible en `assets/store/feature_graphic.png`, 1024x500.
-- Captura vertical 1: menu arcade.
-- Captura vertical 2: gameplay con pellets y rival.
+- Captura vertical 1: menu arcade con tipografia Press Start 2P.
+- Captura vertical 2: gameplay con HUD retro, mapa centrado, pellets y rival.
 - Captura vertical 3: power-up y rival vulnerable.
-- Captura vertical 4: pausa o game over.
+- Captura vertical 4: pausa, game over o modo personalizado con tema arcade.
 - Video promocional: opcional, `PENDIENTE`.
 
 Las capturas deben usar exclusivamente arte propio y no incluir referencias a

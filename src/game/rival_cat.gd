@@ -18,14 +18,19 @@ var direction: Vector2i = Vector2i.LEFT
 var target_position: Vector2
 var state: RivalState = RivalState.SCATTER
 var movement_enabled: bool = true
+var move_speed: float = MOVE_SPEED
+var state_duration: float = STATE_DURATION
 var _state_time: float = 0.0
 var _frightened_time_left: float = 0.0
 var _collision_cooldown: float = 0.0
 
 
-func configure(world: Maze, target_player: Player, start_cell: Vector2i = Vector2i(10, 9)) -> void:
+func configure(world: Maze, target_player: Player, start_cell: Vector2i = Vector2i(10, 9), level_config: LevelConfig = null) -> void:
 	maze = world
 	player = target_player
+	move_speed = level_config.rival_speed if level_config != null else MOVE_SPEED
+	state_duration = lerpf(STATE_DURATION, 2.5, level_config.map_difficulty) if level_config != null else STATE_DURATION
+	scale = Vector2.ONE * (maze.tile_size / Maze.TILE_SIZE)
 	spawn_cell = start_cell
 	reset_position()
 
@@ -70,7 +75,7 @@ func _physics_process(delta: float) -> void:
 			state = RivalState.CHASE
 			_state_time = 0.0
 			queue_redraw()
-	elif _state_time >= STATE_DURATION:
+	elif _state_time >= state_duration:
 		_state_time = 0.0
 		state = RivalState.CHASE if state == RivalState.SCATTER else RivalState.SCATTER
 
@@ -89,7 +94,7 @@ func _physics_process(delta: float) -> void:
 		target_position = maze.cell_to_position(_next_cell(cell, direction))
 		return
 
-	global_position = global_position.move_toward(target_position, MOVE_SPEED * delta)
+	global_position = global_position.move_toward(target_position, move_speed * delta)
 
 
 func _choose_direction() -> void:

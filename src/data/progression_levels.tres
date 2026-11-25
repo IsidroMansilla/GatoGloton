@@ -1,0 +1,340 @@
+[gd_resource type="Resource" script_class="LevelCatalog" load_steps=32 format=3]
+
+[ext_resource type="Script" path="res://src/data/level_catalog.gd" id="1_catalog"]
+[ext_resource type="Script" path="res://src/data/level_config.gd" id="2_config"]
+
+[sub_resource type="Resource" id="LevelConfig_01"]
+script = ExtResource("2_config")
+level_number = 1
+map_id = "map_01"
+player_speed = 72.0
+rival_speed = 48.0
+rival_count = 1
+map_difficulty = 0.0
+power_up_count = 1
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_02"]
+script = ExtResource("2_config")
+level_number = 2
+map_id = "map_01"
+player_speed = 72.0
+rival_speed = 50.0
+rival_count = 1
+map_difficulty = 0.05
+power_up_count = 1
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_03"]
+script = ExtResource("2_config")
+level_number = 3
+map_id = "map_01"
+player_speed = 72.0
+rival_speed = 52.0
+rival_count = 1
+map_difficulty = 0.1
+power_up_count = 1
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_04"]
+script = ExtResource("2_config")
+level_number = 4
+map_id = "map_02"
+player_speed = 72.0
+rival_speed = 54.0
+rival_count = 1
+map_difficulty = 0.15
+power_up_count = 1
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_05"]
+script = ExtResource("2_config")
+level_number = 5
+map_id = "map_02"
+player_speed = 72.0
+rival_speed = 56.0
+rival_count = 1
+map_difficulty = 0.2
+power_up_count = 1
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_06"]
+script = ExtResource("2_config")
+level_number = 6
+map_id = "map_02"
+player_speed = 72.0
+rival_speed = 58.0
+rival_count = 2
+map_difficulty = 0.25
+power_up_count = 1
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_07"]
+script = ExtResource("2_config")
+level_number = 7
+map_id = "map_03"
+player_speed = 72.0
+rival_speed = 60.0
+rival_count = 2
+map_difficulty = 0.3
+power_up_count = 1
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_08"]
+script = ExtResource("2_config")
+level_number = 8
+map_id = "map_03"
+player_speed = 72.0
+rival_speed = 62.0
+rival_count = 2
+map_difficulty = 0.35
+power_up_count = 1
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_09"]
+script = ExtResource("2_config")
+level_number = 9
+map_id = "map_03"
+player_speed = 72.0
+rival_speed = 64.0
+rival_count = 2
+map_difficulty = 0.4
+power_up_count = 1
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_10"]
+script = ExtResource("2_config")
+level_number = 10
+map_id = "map_03"
+player_speed = 72.0
+rival_speed = 66.0
+rival_count = 2
+map_difficulty = 0.45
+power_up_count = 2
+respawn_distance = 4
+
+[sub_resource type="Resource" id="LevelConfig_11"]
+script = ExtResource("2_config")
+level_number = 11
+map_id = "map_04"
+map_size_tier = 2
+player_speed = 72.0
+rival_speed = 68.0
+rival_count = 2
+map_difficulty = 0.5
+power_up_count = 2
+respawn_distance = 5
+
+[sub_resource type="Resource" id="LevelConfig_12"]
+script = ExtResource("2_config")
+level_number = 12
+map_id = "map_04"
+player_speed = 72.0
+rival_speed = 70.0
+rival_count = 2
+map_difficulty = 0.55
+power_up_count = 2
+respawn_distance = 5
+
+[sub_resource type="Resource" id="LevelConfig_13"]
+script = ExtResource("2_config")
+level_number = 13
+map_id = "map_04"
+player_speed = 72.0
+rival_speed = 72.0
+rival_count = 2
+map_difficulty = 0.6
+power_up_count = 2
+respawn_distance = 5
+
+[sub_resource type="Resource" id="LevelConfig_14"]
+script = ExtResource("2_config")
+level_number = 14
+map_id = "map_05"
+player_speed = 72.0
+rival_speed = 74.0
+rival_count = 3
+map_difficulty = 0.6
+power_up_count = 2
+respawn_distance = 5
+
+[sub_resource type="Resource" id="LevelConfig_15"]
+script = ExtResource("2_config")
+level_number = 15
+map_id = "map_05"
+player_speed = 72.0
+rival_speed = 76.0
+rival_count = 3
+map_difficulty = 0.65
+power_up_count = 2
+respawn_distance = 5
+
+[sub_resource type="Resource" id="LevelConfig_16"]
+script = ExtResource("2_config")
+level_number = 16
+map_id = "map_05"
+player_speed = 72.0
+rival_speed = 78.0
+rival_count = 3
+map_difficulty = 0.65
+power_up_count = 2
+respawn_distance = 5
+
+[sub_resource type="Resource" id="LevelConfig_17"]
+script = ExtResource("2_config")
+level_number = 17
+map_id = "map_06"
+player_speed = 72.0
+rival_speed = 80.0
+rival_count = 3
+map_difficulty = 0.7
+power_up_count = 2
+respawn_distance = 5
+
+[sub_resource type="Resource" id="LevelConfig_18"]
+script = ExtResource("2_config")
+level_number = 18
+map_id = "map_06"
+player_speed = 72.0
+rival_speed = 82.0
+rival_count = 3
+map_difficulty = 0.7
+power_up_count = 2
+respawn_distance = 6
+
+[sub_resource type="Resource" id="LevelConfig_19"]
+script = ExtResource("2_config")
+level_number = 19
+map_id = "map_06"
+player_speed = 72.0
+rival_speed = 84.0
+rival_count = 3
+map_difficulty = 0.75
+power_up_count = 3
+respawn_distance = 6
+
+[sub_resource type="Resource" id="LevelConfig_20"]
+script = ExtResource("2_config")
+level_number = 20
+map_id = "map_06"
+player_speed = 72.0
+rival_speed = 86.0
+rival_count = 3
+map_difficulty = 0.75
+power_up_count = 3
+respawn_distance = 6
+
+[sub_resource type="Resource" id="LevelConfig_21"]
+script = ExtResource("2_config")
+level_number = 21
+map_id = "map_07"
+map_size_tier = 3
+player_speed = 72.0
+rival_speed = 86.0
+rival_count = 3
+map_difficulty = 0.8
+power_up_count = 3
+respawn_distance = 6
+
+[sub_resource type="Resource" id="LevelConfig_22"]
+script = ExtResource("2_config")
+level_number = 22
+map_id = "map_07"
+player_speed = 72.0
+rival_speed = 87.0
+rival_count = 3
+map_difficulty = 0.8
+power_up_count = 3
+respawn_distance = 6
+
+[sub_resource type="Resource" id="LevelConfig_23"]
+script = ExtResource("2_config")
+level_number = 23
+map_id = "map_07"
+player_speed = 72.0
+rival_speed = 88.0
+rival_count = 4
+map_difficulty = 0.85
+power_up_count = 3
+respawn_distance = 6
+
+[sub_resource type="Resource" id="LevelConfig_24"]
+script = ExtResource("2_config")
+level_number = 24
+map_id = "map_08"
+player_speed = 72.0
+rival_speed = 88.0
+rival_count = 4
+map_difficulty = 0.85
+power_up_count = 3
+respawn_distance = 6
+
+[sub_resource type="Resource" id="LevelConfig_25"]
+script = ExtResource("2_config")
+level_number = 25
+map_id = "map_08"
+player_speed = 72.0
+rival_speed = 89.0
+rival_count = 4
+map_difficulty = 0.9
+power_up_count = 3
+respawn_distance = 7
+
+[sub_resource type="Resource" id="LevelConfig_26"]
+script = ExtResource("2_config")
+level_number = 26
+map_id = "map_08"
+player_speed = 72.0
+rival_speed = 89.0
+rival_count = 4
+map_difficulty = 0.9
+power_up_count = 3
+respawn_distance = 7
+
+[sub_resource type="Resource" id="LevelConfig_27"]
+script = ExtResource("2_config")
+level_number = 27
+map_id = "map_09"
+player_speed = 72.0
+rival_speed = 90.0
+rival_count = 4
+map_difficulty = 0.95
+power_up_count = 4
+respawn_distance = 7
+
+[sub_resource type="Resource" id="LevelConfig_28"]
+script = ExtResource("2_config")
+level_number = 28
+map_id = "map_09"
+player_speed = 72.0
+rival_speed = 90.0
+rival_count = 4
+map_difficulty = 0.95
+power_up_count = 4
+respawn_distance = 7
+
+[sub_resource type="Resource" id="LevelConfig_29"]
+script = ExtResource("2_config")
+level_number = 29
+map_id = "map_10"
+player_speed = 72.0
+rival_speed = 91.0
+rival_count = 4
+map_difficulty = 1.0
+power_up_count = 4
+respawn_distance = 8
+
+[sub_resource type="Resource" id="LevelConfig_30"]
+script = ExtResource("2_config")
+level_number = 30
+map_id = "map_10"
+player_speed = 72.0
+rival_speed = 92.0
+rival_count = 4
+map_difficulty = 1.0
+power_up_count = 4
+respawn_distance = 8
+
+[resource]
+script = ExtResource("1_catalog")
+levels = [SubResource("LevelConfig_01"), SubResource("LevelConfig_02"), SubResource("LevelConfig_03"), SubResource("LevelConfig_04"), SubResource("LevelConfig_05"), SubResource("LevelConfig_06"), SubResource("LevelConfig_07"), SubResource("LevelConfig_08"), SubResource("LevelConfig_09"), SubResource("LevelConfig_10"), SubResource("LevelConfig_11"), SubResource("LevelConfig_12"), SubResource("LevelConfig_13"), SubResource("LevelConfig_14"), SubResource("LevelConfig_15"), SubResource("LevelConfig_16"), SubResource("LevelConfig_17"), SubResource("LevelConfig_18"), SubResource("LevelConfig_19"), SubResource("LevelConfig_20"), SubResource("LevelConfig_21"), SubResource("LevelConfig_22"), SubResource("LevelConfig_23"), SubResource("LevelConfig_24"), SubResource("LevelConfig_25"), SubResource("LevelConfig_26"), SubResource("LevelConfig_27"), SubResource("LevelConfig_28"), SubResource("LevelConfig_29"), SubResource("LevelConfig_30")]

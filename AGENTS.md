@@ -10,7 +10,7 @@ Arcade de laberinto 2D para Android, en estilo Pac-Man pero con IP propia: un ga
 - Plataforma objetivo: Android (Play Store), `minSdk 24`, `targetSdk 36`, `arm64-v8a`.
 - Vista: **portrait**, viewport base 360x640, `stretch=canvas_items`, `aspect=keep`.
 - Arte: vector plano original. Sin assets ni marcas de terceros.
-- Estado actual: **M1 (movimiento y laberinto)**. El menu de inicio esta pendiente.
+- Estado actual: base jugable completa, 30 niveles progresivos, modo personalizado, game over con rewarded, UI retro y pruebas headless.
 
 ## 2. Comandos
 
@@ -19,6 +19,10 @@ Godot no esta necesariamente en `PATH`. Los scripts aceptan `-GodotExe`.
 ```powershell
 # Importar recursos / validar que el proyecto parsea
 godot --headless --path . --import
+
+# Ejecutar las pruebas headless de los 30 mapas (PowerShell)
+$process = Start-Process -FilePath "C:\ruta\Godot_v4.7.2-stable_mono_win64.exe" -ArgumentList @("--headless", "--path", ".", "--script", "res://tests/test_runner.gd") -Wait -PassThru -NoNewWindow
+if ($process.ExitCode -ne 0) { throw "Tests fallidos" }
 
 # APK de debug -> build\gato_gloton.apk
 powershell -File scripts\build_debug.ps1 -GodotExe "C:\ruta\Godot_v4.7.2-stable_win64.exe"
@@ -44,13 +48,13 @@ Variables de release (Godot las lee directamente):
 ```
 project.godot
 export_presets.cfg          # presets "Android" (APK) y "Google Play" (AAB)
-src/autoload/               # singletons: GameState, SaveManager, AudioManager, AdsManager
+src/autoload/               # singletons: GameState, SaveManager, ProgressionManager, AudioManager, AdsManager
 src/ads/                    # AdsBackend, MockAds, AdMobBackend
-src/game/                   # escenas y scripts de juego (main, maze, player, rival_cat, hud)
-src/data/                   # recursos .tres (maze_data, level_config)
-assets/                     # sprites, audio, fuentes, icono
-tests/unit/                 # tests GUT (pendiente de instalar GUT)
-scripts/                    # build y keystore
+src/game/                   # escenas y scripts de juego (main, maze, player, rival_cat)
+src/data/                   # configuracion de niveles, mapas y modo personalizado
+assets/                     # sprites, audio, fuentes, mapas, icono y recursos de tienda
+tests/                      # runner headless y pruebas de cobertura de mapas
+scripts/                    # build, validacion y renderizado
 .github/workflows/          # CI Android
 ```
 
@@ -69,16 +73,17 @@ scripts/                    # build y keystore
 ## 5. Arquitectura
 
 - **Autoloads**
-  - `GameState`: score, vidas, nivel, senales de cambio, `reset_run()`.
-  - `SaveManager`: JSON versionado en `user://save.json`, migraciones, high score.
+  - `GameState`: score, vidas, nivel, modo personalizado y senales de cambio.
+  - `SaveManager`: JSON versionado en `user://save.json`, high score y nivel maximo.
+  - `ProgressionManager`: catalogo y avance de los 30 niveles progresivos.
   - `AudioManager`: volumen/mute, reproduccion de SFX y musica.
   - `AdsManager`: fachada sobre `AdsBackend`; elige `MockAds` en desktop/editor y `AdMobBackend` en Android.
 - **Juego**
-  - `Main`: state machine `Menu -> Playing -> Dead -> LevelClear`.
-  - `Maze`: `TileMapLayer` de paredes + capa de pellets con custom data.
-  - `Player`, `RivalCat`: movimiento por tiles y estados de IA.
-  - `HUD`: score, vidas, nivel.
-- **IA de rivales**: target tile clasico (perseguidor, emboscador, erratico, patrulla), estados `Scatter/Chase/Frightened/Eaten`, sin A*.
+  - `Main`: state machine `Menu -> Playing -> Paused -> GameOver -> LevelClear`.
+  - `Maze`: mapas generados en celdas completas, pellets, conectividad y respawn seguro.
+  - `Player`, `RivalCat`: movimiento grid-locked y estados de IA.
+  - `HUD`: tabla retro con nivel, IA, puntos y vidas.
+- **IA de rivales**: estados `Scatter/Chase/Frightened`, velocidad y agresividad configurables, sin A*.
 
 ## 6. Reglas de anuncios
 
@@ -108,21 +113,18 @@ scripts/                    # build y keystore
 ## 9. Milestones
 
 - M0: repo, project.godot, autoloads, ads mock, export presets, scripts, CI, APK debug.
-- **M1 (actual)**: laberinto, movimiento grid-locked + input swipe/teclado. El arranque directo es temporal.
-- M2: pellets, score, vidas, condicion de nivel.
-- M3: 4 rivales con IA target-tile y estados.
-- M4: power mode, combo, casa, dificultad.
-- M5: menu/HUD/game over/pausa, high score, D-pad.
-- M6: arte final, audio, juice, rendimiento.
-- M7: AdMob real + UMP.
-- M8: AAB release, ficha y formularios.
-- M9-M11: closed testing 12/14, produccion, metricas.
+- M0-M5: base jugable, menu, HUD, rivales, power mode, pausa y game over.
+- M6: 30 niveles escalables, mapas generados, modo personalizado y UI retro.
+- M7: balance completo y rendimiento Android.
+- M8: logros, desbloqueos, cosmeticos y guardado ampliado.
+- M9: AAB release, ficha y formularios.
+- M10-M12: closed testing 12/14, produccion y metricas.
 
 ## 10. Definicion de "hecho"
 
 - `godot --headless --path . --import` termina sin errores.
 - La app arranca en desktop y en un Android real sin crashes.
-- Tests GUT en verde para la logica tocada (cuando GUT este instalado).
+- `tests/test_runner.gd` en verde: valida los 30 mapas y la cobertura de pellets.
 - Sin secretos ni arte con licencia incompatible en el diff.
 - Diff pequeno, con mensaje de commit claro.
 
@@ -136,4 +138,5 @@ scripts/                    # build y keystore
 - Git remoto: `https://github.com/IsidroMansilla/GatoGloton.git`.
 - El primer APK de debug ya se genero en `build\gato_gloton.apk`.
 - `cmdline-tools` falta para usar `sdkmanager` y el workflow CI; no bloquea instalar el APK local.
-- Instalar GUT (Godot Unit Test) antes de M1.
+- El APK debug se ha instalado y probado en un Redmi Note 9 Pro conectado por ADB.
+- La fuente de interfaz es `assets/fonts/PressStart2P-Regular.ttf` bajo OFL 1.1.

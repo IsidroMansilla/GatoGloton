@@ -1,11 +1,13 @@
 extends Node
 
 const SAVE_PATH := "user://save.json"
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 
 signal high_score_changed(value: int)
+signal highest_level_changed(value: int)
 
 var high_score: int = 0
+var highest_level: int = 1
 
 
 func _ready() -> void:
@@ -17,6 +19,14 @@ func record_score(value: int) -> void:
 		return
 	high_score = value
 	high_score_changed.emit(high_score)
+	save_game()
+
+
+func record_level(value: int) -> void:
+	if value <= highest_level:
+		return
+	highest_level = value
+	highest_level_changed.emit(highest_level)
 	save_game()
 
 
@@ -42,13 +52,16 @@ func load_game() -> void:
 		return
 
 	high_score = int(data.get("high_score", 0))
+	highest_level = maxi(1, int(data.get("highest_level", 1)))
 	high_score_changed.emit(high_score)
+	highest_level_changed.emit(highest_level)
 
 
 func save_game() -> void:
 	var data := {
 		"version": SAVE_VERSION,
 		"high_score": high_score,
+		"highest_level": highest_level,
 	}
 
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
