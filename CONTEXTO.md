@@ -10,7 +10,7 @@
 - Plataforma objetivo: Android / Google Play.
 - Orientacion: portrait.
 - Resolucion logica: `360x640`, stretch `canvas_items`.
-- Estado: base jugable completa, guardado ampliado, logros, personalización visual y audio desbloqueable; pendientes balance final, rendimiento y publicación.
+- Estado: base jugable completa, guardado ampliado, logros, personalizaciÃ³n visual y audio desbloqueable; pendientes balance final, rendimiento y publicaciÃ³n.
 
 ## Entorno
 
@@ -34,7 +34,7 @@ CONTEXTO.md
 OBJETIVOS.md
 src/autoload/               # estado, guardado, progresion, logros, desbloqueos, audio y anuncios
 src/ads/                    # backends MockAds y AdMob/UMP
-src/game/                   # Main, Maze, Player, RivalCat, pantallas y menu
+src/game/                   # Main, Maze, Player, RivalDog, pantallas y menu
 src/data/                   # niveles, mapas, logros, cosmeticos y config personalizada
 assets/fonts/               # Press Start 2P y tema arcade
 assets/maps/                # PNG de referencia de los 30 niveles
@@ -52,7 +52,7 @@ android/                    # plantilla de exportacion Android
 - Movimiento grid-locked por teclado, WASD y swipe.
 - Mapas con paredes de bloques completos y rutas conectadas.
 - Bolas de pelo, power-ups, puntuacion, vidas y respawn seguro.
-- Rivales dinamicos de 1 a 4 segun el nivel.
+- Perros rivales dinamicos de 1 a 4 segun el nivel; el estilo por defecto es un doberman negro con bordes marrones.
 - IA con estados `Scatter`, `Chase` y `Frightened`.
 - Pausa con `CONTINUAR`, `REINICIAR` y `SALIR`.
 - Game over con anuncio recompensado, reinicio y vuelta al menu.
@@ -98,7 +98,7 @@ android/                    # plantilla de exportacion Android
 - Seleccion limitado al nivel maximo progresivo desbloqueado.
 - Configuracion de velocidad del jugador, velocidad y cantidad de rivales,
   dificultad de IA y power-ups.
-- No aumenta récord, nivel maximo, logros ni desbloqueos.
+- No aumenta rÃ©cord, nivel maximo, logros ni desbloqueos.
 
 ### Interfaz y arte
 

@@ -87,7 +87,7 @@ static func _build() -> void:
 		_make("score_5000", "GRAN BOTIN", "Alcanza 5000 puntos.", "high_score", 5000),
 		_make("power_10", "PODEROSO", "Recoge 10 power-ups.", "power_pellets_collected", 10),
 		_make("pellets_100", "RECOLECTOR", "Recoge 100 bolas de pelo.", "pellets_collected", 100),
-		_make("rivals_10", "CAZADOR", "Come 10 gatos rivales.", "rivals_eaten", 10),
+		_make("rivals_10", "CAZADOR", "Come 10 perros rivales.", "rivals_eaten", 10),
 	]
 
 

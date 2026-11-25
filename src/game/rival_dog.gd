@@ -1,4 +1,4 @@
-class_name RivalCat
+class_name RivalDog
 extends Node2D
 
 signal player_caught
@@ -138,22 +138,38 @@ func _distance_to_target(from_cell: Vector2i, target: Vector2i) -> int:
 func _draw() -> void:
 	var palette := _cosmetic_palette("rival")
 	var frightened: Color = palette.get("frightened", Color("#60A5FA"))
-	var fur: Color = frightened if state == RivalState.FRIGHTENED else palette.get("primary", Color("#EC4899"))
-	var shadow: Color = palette.get("secondary", Color("#BE185D"))
-	draw_circle(Vector2.ZERO, 6.0, fur)
+	var rust: Color = palette.get("secondary", Color("#B45309"))
+	var fur: Color = frightened if state == RivalState.FRIGHTENED else palette.get("primary", Color("#111827"))
+	var outline: Color = frightened.darkened(0.25) if state == RivalState.FRIGHTENED else rust
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(-5.0, -3.0),
-		Vector2(-5.0, -9.0),
-		Vector2(-1.0, -5.0),
+		Vector2(-5.2, -2.8),
+		Vector2(-6.6, -10.2),
+		Vector2(-1.6, -5.0),
+	]), outline)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-4.9, -3.6),
+		Vector2(-5.9, -8.5),
+		Vector2(-2.4, -5.1),
 	]), fur)
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(5.0, -3.0),
-		Vector2(5.0, -9.0),
-		Vector2(1.0, -5.0),
+		Vector2(5.2, -2.8),
+		Vector2(6.6, -10.2),
+		Vector2(1.6, -5.0),
+	]), outline)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(4.9, -3.6),
+		Vector2(5.9, -8.5),
+		Vector2(2.4, -5.1),
 	]), fur)
-	draw_circle(Vector2(-2.2, -1.0), 1.0, Color("#111827"))
-	draw_circle(Vector2(2.2, -1.0), 1.0, Color("#111827"))
-	draw_line(Vector2(-3.0, 3.0), Vector2(3.0, 3.0), shadow, 1.0)
+	draw_circle(Vector2.ZERO, 6.2, outline)
+	draw_circle(Vector2.ZERO, 5.4, fur)
+	draw_circle(Vector2(0.0, 2.4), 2.9, outline)
+	draw_circle(Vector2(-2.2, -1.2), 1.0, Color("#FDE68A"))
+	draw_circle(Vector2(2.2, -1.2), 1.0, Color("#FDE68A"))
+	draw_circle(Vector2(-2.3, -2.7), 0.7, outline)
+	draw_circle(Vector2(2.3, -2.7), 0.7, outline)
+	draw_circle(Vector2(0.0, 3.4), 1.2, Color("#0B0F19"))
+	draw_line(Vector2(-1.7, 4.3), Vector2(1.7, 4.3), Color(0.0, 0.0, 0.0, 0.45), 1.0)
 
 
 func _cosmetic_palette(category: String) -> Dictionary:

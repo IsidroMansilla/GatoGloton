@@ -4,7 +4,7 @@ extends RefCounted
 const CATEGORIES: PackedStringArray = ["player", "rival", "maze", "pellets", "effects", "sfx", "music"]
 const CATEGORY_LABELS: Dictionary = {
 	"player": "GATO",
-	"rival": "RIVALES",
+	"rival": "PERROS",
 	"maze": "MAPA",
 	"pellets": "BOLAS",
 	"effects": "EFECTOS",
@@ -131,8 +131,12 @@ static func validate_contrast() -> PackedStringArray:
 			_check_contrast(errors, item.id, "gato/suelo", item.colors.get("primary", Color.BLACK), floor, 3.0)
 	for item in get_category("rival"):
 		for floor in floors:
-			_check_contrast(errors, item.id, "rival/suelo", item.colors.get("primary", Color.BLACK), floor, 3.0)
-			_check_contrast(errors, item.id, "rival asustado/suelo", item.colors.get("frightened", Color.BLACK), floor, 2.5)
+			var primary: Color = item.colors.get("primary", Color.BLACK)
+			var outline: Color = item.colors.get("secondary", primary)
+			var visible_contrast := maxf(contrast_ratio(primary, floor), contrast_ratio(outline, floor))
+			if visible_contrast < 3.0:
+				errors.append("%s: contraste perro/suelo %.2f < 3.0" % [item.id, visible_contrast])
+			_check_contrast(errors, item.id, "perro asustado/suelo", item.colors.get("frightened", Color.BLACK), floor, 2.5)
 	for item in get_category("pellets"):
 		for floor in floors:
 			_check_contrast(errors, item.id, "bola/suelo", item.colors.get("pellet", Color.BLACK), floor, 4.0)
@@ -185,16 +189,16 @@ static func _build() -> void:
 			{"primary": Color("#A855F7"), "secondary": Color("#E9D5FF")},
 		),
 		_make(
-			"rival_rose", "rival", "RIVAL ROSA", "El color original de los perseguidores.",
+			"rival_rose", "rival", "DOBERMAN", "Negro con bordes marron, como un doberman.",
 			"always", 0, "", "Disponible desde el inicio",
 			{
-				"primary": Color("#EC4899"),
-				"secondary": Color("#BE185D"),
+				"primary": Color("#111827"),
+				"secondary": Color("#B45309"),
 				"frightened": Color("#60A5FA"),
 			},
 		),
 		_make(
-			"rival_frost", "rival", "RIVAL GELIDO", "Rivales frios como el hielo.",
+			"rival_frost", "rival", "PERRO GELIDO", "Perros frios como el hielo.",
 			"runs_finished", 2, "", "Termina 2 partidas",
 			{
 				"primary": Color("#38BDF8"),
@@ -203,7 +207,7 @@ static func _build() -> void:
 			},
 		),
 		_make(
-			"rival_shadow", "rival", "RIVAL SOMBRA", "Sombras dificiles de leer.",
+			"rival_shadow", "rival", "PERRO SOMBRA", "Sombras dificiles de leer.",
 			"runs_started", 5, "", "Juega 5 partidas",
 			{
 				"primary": Color("#64748B"),

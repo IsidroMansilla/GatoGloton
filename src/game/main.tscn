@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://1hed3fxwngeb" path="res://src/game/maze.gd" id="2_maze"]
 [ext_resource type="Script" uid="uid://dh7t3u2vucp3q" path="res://src/game/player.gd" id="3_player"]
 [ext_resource type="Script" uid="uid://hoqnhksawdaw" path="res://src/game/arcade_menu.gd" id="4_menu"]
-[ext_resource type="Script" uid="uid://dlkbdhxsae6bu" path="res://src/game/rival_cat.gd" id="5_rival"]
+[ext_resource type="Script" uid="uid://dlkbdhxsae6bu" path="res://src/game/rival_dog.gd" id="5_rival"]
 [ext_resource type="Theme" path="res://assets/fonts/arcade_theme.tres" id="6_theme"]
 
 [sub_resource type="StyleBoxFlat" id="ButtonNormal"]
@@ -78,7 +78,7 @@ script = ExtResource("2_maze")
 [node name="Player" type="Node2D" parent="." unique_id=324401616]
 script = ExtResource("3_player")
 
-[node name="RivalCat" type="Node2D" parent="." unique_id=632461924]
+[node name="RivalDog" type="Node2D" parent="." unique_id=632461924]
 script = ExtResource("5_rival")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=50351950]

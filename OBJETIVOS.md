@@ -4,7 +4,7 @@
 
 Crear y publicar en Google Play un arcade 2D original de laberintos para Android.
 
-El jugador controla un gato que recoge bolas de pelo, evita gatos rivales y utiliza power-ups. El juego tendra dos modos, dificultad progresiva, partidas personalizadas, logros, desbloqueos y personalizacion visual.
+El jugador controla un gato que recoge bolas de pelo, evita perros rivales y utiliza power-ups. El juego tendra dos modos, dificultad progresiva, partidas personalizadas, logros, desbloqueos y personalizacion visual.
 
 El producto final debe ser jugable con controles tactiles, funcionar en portrait, mantener una buena visibilidad en pantallas pequenas y no depender de propiedad intelectual de terceros.
 
@@ -24,7 +24,7 @@ El jugador empieza en el nivel 1 y avanza hasta un maximo inicial de 30 niveles.
 
 La dificultad puede aumentar mediante:
 
-- Numero de gatos rivales.
+- Numero de perros rivales.
 - Velocidad del jugador.
 - Velocidad de los rivales.
 - Diferencia de velocidad entre jugador y rivales.
@@ -170,7 +170,7 @@ Cada logro tendra:
 El jugador podra personalizar:
 
 - Estilo del gato del jugador.
-- Estilo de los gatos rivales.
+- Estilo de los perros rivales.
 - Estilo del mapa.
 - Estilo de paredes y fondo.
 - Estilo de las bolas de pelo.
@@ -212,7 +212,7 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 - [x] Anadir puntuacion.
 - [x] Anadir vidas y respawn.
 - [x] Anadir condicion de nivel completado.
-- [x] Anadir gatos rivales con IA inicial.
+- [x] Anadir perros rivales con IA inicial.
 - [x] Anadir power-ups y modo vulnerable.
 - [x] Anadir pausa y game over.
 - [x] Anadir audio y efectos.
@@ -335,7 +335,7 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 - `Main`: maquina de estados del juego.
 - `Maze`: mapa, pellets, conectividad y celdas validas.
 - `Player`: movimiento, vidas y reaparicion.
-- `RivalCat`: movimiento e inteligencia artificial.
+- `RivalDog`: movimiento e inteligencia artificial.
 - `HUD`: puntuacion, nivel, vidas y estado de partida.
 
 ## 11. Definicion de hecho

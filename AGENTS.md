@@ -1,10 +1,10 @@
-# AGENTS.md — Gato Gloton
+# AGENTS.md â€” Gato Gloton
 
 Guia operativa del proyecto para agentes de IA (opencode) y para cualquier persona que toque el repo. Leer antes de editar.
 
 ## 1. Resumen
 
-Arcade de laberinto 2D para Android, en estilo Pac-Man pero con IP propia: un gato come bolas de pelo y escapa de gatos rivales. Monetizacion con AdMob (rewarded + interstitial). Publicacion en Google Play con cuenta personal.
+Arcade de laberinto 2D para Android, en estilo Pac-Man pero con IP propia: un gato come bolas de pelo y escapa de perros rivales. Monetizacion con AdMob (rewarded + interstitial). Publicacion en Google Play con cuenta personal.
 
 - Motor: **Godot 4.7.x** (renderer Mobile), **GDScript 4 tipado**.
 - Plataforma objetivo: Android (Play Store), `minSdk 24`, `targetSdk 36`, `arm64-v8a`.
@@ -50,7 +50,7 @@ project.godot
 export_presets.cfg          # presets "Android" (APK) y "Google Play" (AAB)
 src/autoload/               # singletons: GameState, SaveManager, ProgressionManager, AchievementManager, UnlockManager, AudioManager, AdsManager
 src/ads/                    # AdsBackend, MockAds, AdMobBackend
-src/game/                   # escenas y scripts de juego (main, maze, player, rival_cat, pantallas)
+src/game/                   # escenas y scripts de juego (main, maze, player, rival_dog, pantallas)
 src/data/                   # niveles, mapas, logros, cosmeticos y modo personalizado
 assets/                     # sprites, audio, fuentes, mapas, icono y recursos de tienda
 tests/                      # runner headless y pruebas de cobertura de mapas
@@ -83,7 +83,7 @@ scripts/                    # build, validacion y renderizado
 - **Juego**
   - `Main`: state machine `Menu -> Playing -> Paused -> GameOver -> LevelClear`.
   - `Maze`: mapas generados en celdas completas, pellets, conectividad y respawn seguro.
-  - `Player`, `RivalCat`: movimiento grid-locked y estados de IA.
+  - `Player`, `RivalDog`: movimiento grid-locked y estados de IA.
   - `HUD`: tabla retro con nivel, IA, puntos y vidas.
 - **IA de rivales**: estados `Scatter/Chase/Frightened`, velocidad y agresividad configurables, sin A*.
 

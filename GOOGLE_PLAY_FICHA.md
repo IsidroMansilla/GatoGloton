@@ -13,7 +13,7 @@ configuracion final de AdMob.
 - Contiene anuncios: `Si`
 - Compras dentro de la aplicacion: `No`
 - Orientacion: `Vertical`
-- Idioma principal: `Español`
+- Idioma principal: `EspaÃ±ol`
 - Correo de contacto: `isidro.mansilla.1994@outlook.es`
 - Politica de privacidad: `https://github.com/IsidroMansilla/GatoGloton/blob/main/PRIVACIDAD.md`
 
@@ -40,7 +40,7 @@ reflejos, rutas cortas y decisiones rapidas.`
 - `Laberintos arcade en orientacion vertical.`
 - `Controles por deslizamiento, flechas y WASD.`
 - `Pellets normales y power-ups especiales.`
-- `Rivales con persecucion y patrulla.`
+- `Perros rivales con persecucion y patrulla.`
 - `Vidas, respawn, pausa y record local.`
 - `Efectos de sonido originales y anuncios integrados con consentimiento.`
 

@@ -6,7 +6,7 @@ const ARCADE_THEME: Theme = preload("res://assets/fonts/arcade_theme.tres")
 
 @onready var _maze: Maze = $Maze
 @onready var _player: Player = $Player
-@onready var _rival: RivalCat = $RivalCat
+@onready var _rival: RivalDog = $RivalDog
 @onready var _status: Label = $UI/Status
 @onready var _status_frame: Panel = $UI/StatusFrame
 @onready var _pause_button: Button = $UI/PauseButton
@@ -26,7 +26,7 @@ enum GameMode { MENU, PLAYING, PAUSED, GAME_OVER, LEVEL_CLEAR }
 var _mode: GameMode = GameMode.MENU
 var _swipe_start: Vector2
 var _level_config: LevelConfig
-var _rivals: Array[RivalCat] = []
+var _rivals: Array[RivalDog] = []
 var _continue_used: bool = false
 var _waiting_reward: bool = false
 var _is_custom_game: bool = false
@@ -599,7 +599,7 @@ func _set_game_physics(enabled: bool) -> void:
 
 func _configure_rivals() -> void:
 	while _rivals.size() < _level_config.rival_count:
-		var rival := RivalCat.new()
+		var rival := RivalDog.new()
 		add_child(rival)
 		_rivals.append(rival)
 		_bind_rival(rival)
@@ -619,7 +619,7 @@ func _configure_rivals() -> void:
 		rival.configure(_maze, _player, spawn_cell, _level_config)
 
 
-func _bind_rival(rival: RivalCat) -> void:
+func _bind_rival(rival: RivalDog) -> void:
 	rival.player_caught.connect(_on_rival_caught)
 	rival.rival_eaten.connect(_on_rival_eaten)
 
