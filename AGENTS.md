@@ -93,7 +93,7 @@ scripts/                    # build, validacion y renderizado
 - En Android, **UMP/consentimiento antes de cargar** cualquier anuncio.
 - La inicializacion de `MobileAds` v5 es **asincrona**: no cargar ads hasta el callback.
 - IDs de prueba en debug. Nunca hacer clic en anuncios propios.
-- Rewarded: "continuar" una vez por partida y "x2 puntos" opcional. Interstitial con cooldown >= 60 s o cada 2 partidas. Banner solo en menu.
+- Rewarded: "continuar" una vez por partida. Interstitial: al completar cada nivel progresivo (salvo el nivel 30), mostrando despues un menu con un unico boton `NIVEL N`; si no esta listo, se omite. Banner solo en menu.
 - Plugin previsto: `poingstudios/godot-admob-plugin` v5.x (Godot >= 4.5).
 
 ## 7. Android y Google Play

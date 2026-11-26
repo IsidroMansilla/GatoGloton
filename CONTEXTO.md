@@ -63,6 +63,8 @@ android/                    # plantilla de exportacion Android
 - Mapas de `13x11` a `25x21` celdas.
 - Tamano de celda adaptativo para mantener la visibilidad en portrait.
 - Velocidad, rivales, power-ups y agresividad de IA configurables por nivel.
+- Al completar un nivel se muestra un interstitial; al cerrarlo aparece un menu
+  con un unico boton `NIVEL N` para comenzar el siguiente nivel.
 - Nivel maximo guardado en `user://save.json`.
 
 ### Guardado y estadisticas
@@ -121,10 +123,10 @@ aislamiento de las partidas personalizadas.
 
 El runner `tests/progression_test_runner.gd` valida los catalogos de logros,
 cosmeticos y audio, el calculo de progreso, las reglas de desbloqueo, el contraste
-visual y la generacion de pistas musicales.
+visual, la generacion de pistas musicales y el cierre del interstitial simulado.
 
 Resultado validado actualmente: `380 passed, 0 failed` en mapas, `97 passed, 0 failed`
-en guardado y `85 passed, 0 failed` en progresion.
+en guardado y `88 passed, 0 failed` en progresion.
 
 Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 `Start-Process -Wait -PassThru`, porque el ejecutable Mono puede dejar

@@ -43,6 +43,7 @@ reflejos, rutas cortas y decisiones rapidas.`
 - `Perros rivales con persecucion y patrulla.`
 - `Vidas, respawn, pausa y record local.`
 - `Efectos de sonido originales y anuncios integrados con consentimiento.`
+- `Anuncio interstitial entre niveles y rewarded opcional para continuar.`
 
 `Juega una partida rapida, supera tu record y vuelve a intentarlo.`
 

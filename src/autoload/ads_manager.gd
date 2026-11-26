@@ -30,7 +30,14 @@ func is_rewarded_ready() -> bool:
 	return backend != null and backend.is_ready()
 
 
+func is_interstitial_ready() -> bool:
+	return backend != null and backend.is_interstitial_ready()
+
+
 func show_interstitial() -> void:
+	if backend == null:
+		interstitial_dismissed.emit()
+		return
 	backend.show_interstitial()
 
 

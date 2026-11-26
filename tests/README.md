@@ -34,9 +34,10 @@ Resultado de referencia actual: `97 passed, 0 failed`.
 - Reglas de desbloqueo por nivel, partidas, logros y niveles completados.
 - Contraste de todos los estilos visuales.
 - Generacion de pistas de musica y variantes de sonido.
-- API publica de `AchievementManager`, `UnlockManager` y `AudioManager`.
+- Disponibilidad y cierre del interstitial simulado.
+- API publica de `AchievementManager`, `UnlockManager`, `AdsManager` y `AudioManager`.
 
-Resultado de referencia actual: `85 passed, 0 failed`.
+Resultado de referencia actual: `88 passed, 0 failed`.
 
 En PowerShell, usa `Start-Process` para obtener correctamente el codigo de salida con el ejecutable de Godot instalado en este proyecto. El runner de guardado necesita `--quit-after` para cerrar el proceso de forma fiable tras escribir en disco:
 

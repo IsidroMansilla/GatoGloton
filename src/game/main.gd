@@ -29,6 +29,8 @@ var _level_config: LevelConfig
 var _rivals: Array[RivalDog] = []
 var _continue_used: bool = false
 var _waiting_reward: bool = false
+var _waiting_interstitial: bool = false
+var _pending_next_level: int = 0
 var _is_custom_game: bool = false
 var _run_finished_counted: bool = false
 var _level_lives_lost: int = 0
@@ -75,6 +77,7 @@ func _ready() -> void:
 	_menu_button.pressed.connect(_return_to_menu)
 	AdsManager.rewarded_completed.connect(_on_rewarded_completed)
 	AdsManager.rewarded_failed.connect(_on_rewarded_failed)
+	AdsManager.interstitial_dismissed.connect(_on_interstitial_dismissed)
 	_player.hit_received.connect(_on_player_hit)
 	_bind_rival(_rival)
 	_maze.pellet_collected.connect(_on_pellet_collected)
@@ -97,6 +100,8 @@ func _start_game() -> void:
 	GameState.is_custom_game = _is_custom_game
 	_continue_used = false
 	_waiting_reward = false
+	_waiting_interstitial = false
+	_pending_next_level = 0
 	_run_finished_counted = false
 	_resume_button.disabled = false
 	if not _is_custom_game:
@@ -169,11 +174,71 @@ func _on_level_completed() -> void:
 		return
 	SaveManager.record_level_completed(false, _level_lives_lost == 0)
 	if ProgressionManager.complete_current_level():
-		_show_result_overlay("NIVEL %d COMPLETO" % completed_level, "Preparando nivel %d..." % GameState.level)
-		_continue_to_next_level()
+		_request_level_break(GameState.level, completed_level)
 	else:
 		SaveManager.record_run_won()
 		_show_result_overlay("JUEGO COMPLETADO", "Has superado los 30 niveles\nPuntos: %d" % GameState.score)
+
+
+func _request_level_break(next_level: int, completed_level: int) -> void:
+	_pending_next_level = next_level
+	_show_level_break_wait(completed_level)
+	if AdsManager.is_interstitial_ready():
+		_waiting_interstitial = true
+		AdsManager.show_interstitial()
+		_interstitial_fallback(next_level)
+	else:
+		_show_next_level_menu(next_level)
+
+
+func _show_level_break_wait(completed_level: int) -> void:
+	_pause_title.text = "NIVEL %d COMPLETO" % completed_level
+	_pause_message.text = "Cargando anuncio..."
+	_resume_button.visible = false
+	_resume_button.disabled = true
+	_restart_button.visible = false
+	_menu_button.visible = false
+	_pause_overlay.visible = true
+
+
+func _on_interstitial_dismissed() -> void:
+	if not _waiting_interstitial:
+		return
+	_waiting_interstitial = false
+	if _mode != GameMode.LEVEL_CLEAR or _pending_next_level <= 0:
+		return
+	_show_next_level_menu(_pending_next_level)
+
+
+func _interstitial_fallback(next_level: int) -> void:
+	await get_tree().create_timer(15.0).timeout
+	if not _waiting_interstitial or _mode != GameMode.LEVEL_CLEAR or _pending_next_level != next_level:
+		return
+	_waiting_interstitial = false
+	_show_next_level_menu(next_level)
+
+
+func _show_next_level_menu(next_level: int) -> void:
+	_pause_title.text = "NIVEL %d COMPLETO" % (next_level - 1)
+	_pause_message.text = "Siguiente nivel"
+	_resume_button.text = "NIVEL %d" % next_level
+	_resume_button.visible = true
+	_resume_button.disabled = false
+	_restart_button.visible = false
+	_menu_button.visible = false
+	_pause_overlay.visible = true
+
+
+func _start_pending_level() -> void:
+	if _pending_next_level <= 0:
+		return
+	var next_level := _pending_next_level
+	_pending_next_level = 0
+	if GameState.level != next_level:
+		GameState.level = next_level
+		GameState.level_changed.emit(GameState.level)
+	_pause_overlay.visible = false
+	_start_current_level()
 
 
 func _on_player_hit() -> void:
@@ -277,6 +342,8 @@ func _on_resume_button_pressed() -> void:
 		_resume_game()
 	elif _mode == GameMode.GAME_OVER:
 		_request_rewarded_continue()
+	elif _mode == GameMode.LEVEL_CLEAR:
+		_start_pending_level()
 
 
 func _request_rewarded_continue() -> void:
@@ -321,6 +388,8 @@ func _return_to_menu() -> void:
 	SaveManager.flush()
 	_set_game_physics(false)
 	_mode = GameMode.MENU
+	_waiting_interstitial = false
+	_pending_next_level = 0
 	_maze.visible = false
 	_player.visible = false
 	for rival in _rivals:
@@ -622,14 +691,6 @@ func _configure_rivals() -> void:
 func _bind_rival(rival: RivalDog) -> void:
 	rival.player_caught.connect(_on_rival_caught)
 	rival.rival_eaten.connect(_on_rival_eaten)
-
-
-func _continue_to_next_level() -> void:
-	await get_tree().create_timer(1.25).timeout
-	if _mode != GameMode.LEVEL_CLEAR:
-		return
-	_pause_overlay.visible = false
-	_start_current_level()
 
 
 func _unhandled_input(event: InputEvent) -> void:

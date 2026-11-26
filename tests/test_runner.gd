@@ -4,9 +4,11 @@ const LEVEL_CATALOG: LevelCatalog = preload("res://src/data/progression_levels.t
 
 var passed: int = 0
 var failed: int = 0
+var _uses_quit_after: bool = false
 
 
 func _initialize() -> void:
+	_uses_quit_after = _detect_quit_after()
 	var maze := Maze.new()
 	root.add_child(maze)
 	await process_frame
@@ -23,7 +25,15 @@ func _initialize() -> void:
 	maze.queue_free()
 	await process_frame
 	print("Automated map test: %d passed, %d failed" % [passed, failed])
-	quit(1 if failed > 0 else 0)
+	if failed > 0 or not _uses_quit_after:
+		call_deferred("quit", 1 if failed > 0 else 0)
+
+
+func _detect_quit_after() -> bool:
+	for argument in OS.get_cmdline_args():
+		if argument == "--quit-after" or argument.begins_with("--quit-after="):
+			return true
+	return false
 
 
 func _check_level(level_number: int, maze: Maze, previous_width: int, previous_height: int) -> void:

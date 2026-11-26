@@ -15,6 +15,8 @@ var _music_cache: Dictionary = {}
 
 
 func _ready() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	_sfx_player = AudioStreamPlayer.new()
 	var generator := AudioStreamGenerator.new()
 	generator.mix_rate = 22050.0
@@ -38,13 +40,11 @@ func _exit_tree() -> void:
 	if _sfx_player != null:
 		_sfx_player.stop()
 		_sfx_player.stream = null
-		_sfx_player.free()
 		_sfx_player = null
 		_sfx_playback = null
 	if _music_player != null:
 		_music_player.stop()
 		_music_player.stream = null
-		_music_player.free()
 		_music_player = null
 	_music_cache.clear()
 

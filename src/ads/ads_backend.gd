@@ -14,6 +14,10 @@ func is_ready() -> bool:
 	return false
 
 
+func is_interstitial_ready() -> bool:
+	return false
+
+
 func show_rewarded() -> void:
 	rewarded_failed.emit("not_implemented")
 

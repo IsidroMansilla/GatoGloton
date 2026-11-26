@@ -10,6 +10,10 @@ func is_ready() -> bool:
 	return true
 
 
+func is_interstitial_ready() -> bool:
+	return true
+
+
 func show_rewarded() -> void:
 	print("[MockAds] rewarded simulado")
 	rewarded_completed.emit()

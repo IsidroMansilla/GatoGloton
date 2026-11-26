@@ -23,6 +23,10 @@ func is_ready() -> bool:
 	return _ready
 
 
+func is_interstitial_ready() -> bool:
+	return _interstitial_ad != null
+
+
 func show_rewarded() -> void:
 	if _rewarded_ad == null:
 		rewarded_failed.emit("rewarded_not_ready")
@@ -35,6 +39,7 @@ func show_rewarded() -> void:
 
 func show_interstitial() -> void:
 	if _interstitial_ad == null:
+		interstitial_dismissed.emit()
 		return
 	_interstitial_ad.show()
 
@@ -108,6 +113,13 @@ func _load_interstitial() -> void:
 			ad.destroy()
 			_interstitial_ad = null
 			_load_interstitial()
+			interstitial_dismissed.emit()
+		ad.full_screen_content_callback.on_ad_failed_to_show_full_screen_content = func(error: AdError) -> void:
+			push_warning("Interstitial no se pudo mostrar: %s" % error.message)
+			ad.destroy()
+			_interstitial_ad = null
+			_load_interstitial()
+			interstitial_dismissed.emit()
 	callback.on_ad_failed_to_load = func(error: LoadAdError) -> void:
 		push_warning("Interstitial no disponible: %s" % error.message)
 	InterstitialAdLoader.new().load(TEST_INTERSTITIAL_ID, AdRequest.new(), callback)

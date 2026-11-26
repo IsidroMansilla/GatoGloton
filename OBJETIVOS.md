@@ -255,6 +255,7 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 - [x] Deshabilitar continuar cuando no haya anuncio disponible.
 - [x] Integrar AdMob y UMP.
 - [x] Verificar el flujo de anuncio recompensado en Android.
+- [x] Mostrar interstitial al completar cada nivel progresivo y esperar la confirmacion del siguiente nivel.
 
 ### Fase 6: Modo personalizado
 

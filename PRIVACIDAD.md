@@ -33,6 +33,9 @@ para solicitar y gestionar el consentimiento cuando corresponde. Puedes
 aceptar, rechazar o administrar las opciones disponibles en el formulario de
 consentimiento.
 
+Los formatos pueden incluir anuncios interstitial al completar un nivel y
+anuncios rewarded opcionales para continuar tras un game over.
+
 Consulta tambien las politicas de Google:
 
 - https://policies.google.com/privacy

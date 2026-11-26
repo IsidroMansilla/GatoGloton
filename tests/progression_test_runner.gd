@@ -5,6 +5,7 @@ var failed: int = 0
 var _uses_quit_after: bool = false
 var _achievement_manager: Variant
 var _unlock_manager: Variant
+var _interstitial_seen: bool = false
 
 
 func _initialize() -> void:
@@ -19,6 +20,7 @@ func _initialize() -> void:
 	_test_contrast()
 	_test_manager_api()
 	_test_audio_styles()
+	_test_ads_interstitial()
 	await process_frame
 	print("Progression test: %d passed, %d failed" % [passed, failed])
 	if failed > 0 or not _uses_quit_after:
@@ -133,6 +135,23 @@ func _test_audio_styles() -> void:
 	_check(night != null and night.data.size() > 0, "genera pista de musica nocturna")
 	var invalid: AudioStreamWAV = audio.call("_build_music_stream", "invalida")
 	_check(invalid == null, "pista de musica invalida no se genera")
+
+
+func _test_ads_interstitial() -> void:
+	var ads := root.get_node_or_null("AdsManager")
+	_check(ads != null, "autoload AdsManager disponible")
+	if ads == null:
+		return
+	_check(ads.is_interstitial_ready(), "mock interstitial listo")
+	_interstitial_seen = false
+	ads.connect("interstitial_dismissed", Callable(self, "_on_interstitial_seen"))
+	ads.show_interstitial()
+	_check(_interstitial_seen, "mock interstitial emite dismissed")
+	ads.disconnect("interstitial_dismissed", Callable(self, "_on_interstitial_seen"))
+
+
+func _on_interstitial_seen() -> void:
+	_interstitial_seen = true
 
 
 func _test_manager_api() -> void:
