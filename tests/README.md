@@ -10,8 +10,9 @@ Comprueba:
 - Ruta valida de cobertura desde el spawn del jugador.
 - Recogida de todos los pellets.
 - Spawns seguros para la cantidad de rivales del nivel.
+- Modo infierno sin pellets ni coleccionables.
 
-Resultado de referencia actual: `380 passed, 0 failed`.
+Resultado de referencia actual: `410 passed, 0 failed`.
 
 Estas pruebas validan la completabilidad estructural de los mapas sin rivales;
 el balance de la IA se valida aparte en Android real.
@@ -23,8 +24,9 @@ el balance de la IA se valida aparte en Android real.
 - Round trip de record, estadisticas, logros, desbloqueos, cosmeticos y config personalizada.
 - Saneado de tipos invalidos y escritura fallida.
 - Aislamiento de las partidas personalizadas respecto a estadisticas y progreso.
+- Records de tiempo del modo infierno y saneado de valores invalidos.
 
-Resultado de referencia actual: `97 passed, 0 failed`.
+Resultado de referencia actual: `106 passed, 0 failed`.
 
 `progression_test_runner.gd` valida logros, desbloqueos y contenido visual/sonoro:
 
@@ -35,9 +37,10 @@ Resultado de referencia actual: `97 passed, 0 failed`.
 - Contraste de todos los estilos visuales.
 - Generacion de pistas de musica y variantes de sonido.
 - Disponibilidad y cierre del interstitial simulado.
+- Reglas, formato de tiempo y curva de oleadas del modo infierno.
 - API publica de `AchievementManager`, `UnlockManager`, `AdsManager` y `AudioManager`.
 
-Resultado de referencia actual: `88 passed, 0 failed`.
+Resultado de referencia actual: `95 passed, 0 failed`.
 
 En PowerShell, usa `Start-Process` para obtener correctamente el codigo de salida con el ejecutable de Godot instalado en este proyecto. El runner de guardado necesita `--quit-after` para cerrar el proceso de forma fiable tras escribir en disco:
 

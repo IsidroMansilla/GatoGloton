@@ -27,6 +27,7 @@ AchievementManager="*res://src/autoload/achievement_manager.gd"
 UnlockManager="*res://src/autoload/unlock_manager.gd"
 AudioManager="*res://src/autoload/audio_manager.gd"
 AdsManager="*res://src/autoload/ads_manager.gd"
+DevUnlock="*res://src/autoload/dev_unlock.gd"
 
 [display]
 

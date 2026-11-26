@@ -60,6 +60,8 @@ func _check_level(level_number: int, maze: Maze, previous_width: int, previous_h
 	for cell in route:
 		maze.collect_pellet(cell)
 	_check(maze.pellets_remaining() == 0, "nivel %02d se puede completar recogiendo pellets" % level_number)
+	maze.reset_hell()
+	_check(maze.pellets_remaining() == 0, "nivel %02d no genera pellets en infierno" % level_number)
 
 	var occupied_cells: Array[Vector2i] = [map.player_spawn]
 	for rival_index in config.rival_count:

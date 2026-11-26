@@ -21,8 +21,10 @@ const ARCADE_THEME: Theme = preload("res://assets/fonts/arcade_theme.tres")
 @onready var _custom_button: Button = $UI/Menu/CustomButton
 @onready var _achievements_button: Button = $UI/Menu/AchievementsButton
 @onready var _customize_button: Button = $UI/Menu/CustomizeButton
+@onready var _hell_button: Button = $UI/Menu/HellButton
 
 enum GameMode { MENU, PLAYING, PAUSED, GAME_OVER, LEVEL_CLEAR }
+enum InterstitialAction { NONE, NEXT_LEVEL, HELL_RESULTS }
 var _mode: GameMode = GameMode.MENU
 var _swipe_start: Vector2
 var _level_config: LevelConfig
@@ -30,8 +32,15 @@ var _rivals: Array[RivalDog] = []
 var _continue_used: bool = false
 var _waiting_reward: bool = false
 var _waiting_interstitial: bool = false
+var _interstitial_action: InterstitialAction = InterstitialAction.NONE
 var _pending_next_level: int = 0
 var _is_custom_game: bool = false
+var _is_hell_game: bool = false
+var _hell_level: int = 1
+var _hell_time: float = 0.0
+var _hell_spawn_timer: float = 0.0
+var _hell_final_time: float = 0.0
+var _hell_new_record: bool = false
 var _run_finished_counted: bool = false
 var _level_lives_lost: int = 0
 var _custom_config: CustomGameConfig
@@ -45,6 +54,7 @@ var _custom_power_ups: HSlider
 var _custom_value_labels: Dictionary = {}
 var _achievements_screen: AchievementsScreen
 var _customization_screen: CustomizationScreen
+var _hell_screen: HellSelectScreen
 var _toast_panel: Panel
 var _toast_label: Label
 var _toast_queue: Array[String] = []
@@ -71,6 +81,7 @@ func _ready() -> void:
 	_custom_button.pressed.connect(_open_custom_menu)
 	_achievements_button.pressed.connect(_open_achievements)
 	_customize_button.pressed.connect(_open_customization)
+	_hell_button.pressed.connect(_open_hell_menu)
 	_pause_button.pressed.connect(_toggle_pause)
 	_resume_button.pressed.connect(_on_resume_button_pressed)
 	_restart_button.pressed.connect(_restart_game)
@@ -89,7 +100,20 @@ func _ready() -> void:
 	$UI/Menu/HighScore.text = "RECORD  %04d\nNIVEL MAXIMO  %02d" % [SaveManager.high_score, SaveManager.highest_level]
 	_build_custom_panel()
 	_build_progress_screens()
+	_build_hell_screen()
 	_build_unlock_toast()
+	_update_hell_button()
+
+
+func _process(delta: float) -> void:
+	if _mode != GameMode.PLAYING or not _is_hell_game:
+		return
+	_hell_time += delta
+	_hell_spawn_timer -= delta
+	if _hell_spawn_timer <= 0.0:
+		_spawn_hell_enemy()
+		_hell_spawn_timer = HellRules.spawn_interval(_hell_time)
+	_update_status()
 
 
 func _start_game() -> void:
@@ -98,13 +122,24 @@ func _start_game() -> void:
 	_mode = GameMode.PLAYING
 	GameState.reset_run()
 	GameState.is_custom_game = _is_custom_game
+	GameState.is_hell_game = _is_hell_game
 	_continue_used = false
 	_waiting_reward = false
 	_waiting_interstitial = false
+	_interstitial_action = InterstitialAction.NONE
 	_pending_next_level = 0
 	_run_finished_counted = false
 	_resume_button.disabled = false
-	if not _is_custom_game:
+	if _is_hell_game:
+		GameState.level = _hell_level
+		GameState.lives = HellRules.PLAYER_LIVES
+		GameState.level_changed.emit(GameState.level)
+		GameState.lives_changed.emit(GameState.lives)
+		_hell_time = 0.0
+		_hell_spawn_timer = HellRules.spawn_interval(0.0)
+		_hell_final_time = 0.0
+		_hell_new_record = false
+	elif not _is_custom_game:
 		ProgressionManager.start_run()
 		SaveManager.record_run_started()
 	_start_current_level()
@@ -114,6 +149,9 @@ func _start_current_level() -> void:
 	if _is_custom_game:
 		_level_config = _custom_level_config()
 		GameState.level = _custom_config.level_number
+	elif _is_hell_game:
+		_level_config = LEVEL_CATALOG.get_level(_hell_level)
+		GameState.level = _hell_level
 	else:
 		_level_config = ProgressionManager.start_current_level()
 	if _level_config == null:
@@ -121,11 +159,18 @@ func _start_current_level() -> void:
 		return
 	_mode = GameMode.PLAYING
 	_level_lives_lost = 0
+	_maze.set_hell_mode(_is_hell_game)
 	_maze.configure_map(MAZE_CATALOG.get_map(_level_config.map_id, GameState.level))
-	_maze.reset_pellets(_maze.player_spawn_cell, _level_config.power_up_count)
+	if _is_hell_game:
+		_maze.reset_hell()
+	else:
+		_maze.reset_pellets(_maze.player_spawn_cell, _level_config.power_up_count)
 	_maze.visible = true
 	_player.visible = true
-	_configure_rivals()
+	if _is_hell_game:
+		_configure_hell_rivals()
+	else:
+		_configure_rivals()
 	_menu.visible = false
 	_status.visible = true
 	_status_frame.visible = true
@@ -142,13 +187,13 @@ func _start_current_level() -> void:
 
 func _on_pellet_collected(points: int) -> void:
 	GameState.add_score(points)
-	SaveManager.record_pellet_collected(_is_custom_game)
+	SaveManager.record_pellet_collected(_blocks_progress())
 	AudioManager.play_sfx("pellet")
 	_update_status()
 
 
 func _on_power_pellet_collected() -> void:
-	SaveManager.record_power_pellet_collected(_is_custom_game)
+	SaveManager.record_power_pellet_collected(_blocks_progress())
 	for rival in _rivals:
 		if rival.visible:
 			rival.set_frightened(8.0)
@@ -158,12 +203,14 @@ func _on_power_pellet_collected() -> void:
 
 func _on_rival_eaten() -> void:
 	GameState.add_score(200)
-	SaveManager.record_rival_eaten(_is_custom_game)
+	SaveManager.record_rival_eaten(_blocks_progress())
 	AudioManager.play_sfx("eat")
 	_update_status()
 
 
 func _on_level_completed() -> void:
+	if _is_hell_game:
+		return
 	_mode = GameMode.LEVEL_CLEAR
 	_set_game_physics(false)
 	_pause_button.visible = false
@@ -177,16 +224,19 @@ func _on_level_completed() -> void:
 		_request_level_break(GameState.level, completed_level)
 	else:
 		SaveManager.record_run_won()
-		_show_result_overlay("JUEGO COMPLETADO", "Has superado los 30 niveles\nPuntos: %d" % GameState.score)
+		_update_hell_button()
+		_show_result_overlay(
+			"JUEGO COMPLETADO",
+			"Has superado los 30 niveles\nMODO INFIERNO DESBLOQUEADO\nPuntos: %d" % GameState.score,
+		)
+		_menu_button.visible = true
 
 
 func _request_level_break(next_level: int, completed_level: int) -> void:
 	_pending_next_level = next_level
 	_show_level_break_wait(completed_level)
 	if AdsManager.is_interstitial_ready():
-		_waiting_interstitial = true
-		AdsManager.show_interstitial()
-		_interstitial_fallback(next_level)
+		_start_interstitial(InterstitialAction.NEXT_LEVEL)
 	else:
 		_show_next_level_menu(next_level)
 
@@ -201,21 +251,39 @@ func _show_level_break_wait(completed_level: int) -> void:
 	_pause_overlay.visible = true
 
 
+func _start_interstitial(action: InterstitialAction) -> void:
+	_waiting_interstitial = true
+	_interstitial_action = action
+	AdsManager.show_interstitial()
+	_interstitial_fallback(action)
+
+
 func _on_interstitial_dismissed() -> void:
 	if not _waiting_interstitial:
 		return
 	_waiting_interstitial = false
-	if _mode != GameMode.LEVEL_CLEAR or _pending_next_level <= 0:
-		return
-	_show_next_level_menu(_pending_next_level)
+	var action := _interstitial_action
+	_interstitial_action = InterstitialAction.NONE
+	_resolve_interstitial(action)
 
 
-func _interstitial_fallback(next_level: int) -> void:
+func _interstitial_fallback(action: InterstitialAction) -> void:
 	await get_tree().create_timer(15.0).timeout
-	if not _waiting_interstitial or _mode != GameMode.LEVEL_CLEAR or _pending_next_level != next_level:
+	if not _waiting_interstitial or _interstitial_action != action:
 		return
 	_waiting_interstitial = false
-	_show_next_level_menu(next_level)
+	_interstitial_action = InterstitialAction.NONE
+	_resolve_interstitial(action)
+
+
+func _resolve_interstitial(action: InterstitialAction) -> void:
+	match action:
+		InterstitialAction.NEXT_LEVEL:
+			if _mode == GameMode.LEVEL_CLEAR and _pending_next_level > 0:
+				_show_next_level_menu(_pending_next_level)
+		InterstitialAction.HELL_RESULTS:
+			if _mode == GameMode.GAME_OVER and _is_hell_game:
+				_show_hell_results()
 
 
 func _show_next_level_menu(next_level: int) -> void:
@@ -241,11 +309,94 @@ func _start_pending_level() -> void:
 	_start_current_level()
 
 
+func _finish_hell_run() -> void:
+	_hell_final_time = _hell_time
+	_hell_new_record = SaveManager.record_hell_time(_hell_level, _hell_final_time)
+	_show_hell_wait()
+	if AdsManager.is_interstitial_ready():
+		_start_interstitial(InterstitialAction.HELL_RESULTS)
+	else:
+		_show_hell_results()
+
+
+func _show_hell_wait() -> void:
+	_pause_title.text = "MODO INFIERNO"
+	_pause_message.text = "Cargando anuncio..."
+	_resume_button.visible = false
+	_resume_button.disabled = true
+	_restart_button.visible = false
+	_menu_button.visible = false
+	_pause_overlay.visible = true
+
+
+func _show_hell_results() -> void:
+	_pause_title.text = "MODO INFIERNO"
+	var best := SaveManager.get_hell_best_time(_hell_level)
+	var record_text := "NUEVO RECORD!" if _hell_new_record else "MEJOR " + HellRules.format_time(best)
+	_pause_message.text = "Tiempo: %s\n%s" % [HellRules.format_time(_hell_final_time), record_text]
+	_resume_button.visible = false
+	_restart_button.visible = true
+	_restart_button.text = "VOLVER A INTENTARLO"
+	_menu_button.text = "VOLVER AL MENU"
+	_menu_button.visible = true
+	_pause_overlay.visible = true
+
+
+func _visible_rival_count() -> int:
+	var total := 0
+	for rival in _rivals:
+		if rival.visible:
+			total += 1
+	return total
+
+
+func _hide_all_rivals() -> void:
+	for rival in _rivals:
+		rival.visible = false
+		rival.stop_movement()
+		rival.set_physics_process(false)
+
+
+func _configure_hell_rivals() -> void:
+	_hide_all_rivals()
+	_spawn_hell_enemy()
+
+
+func _spawn_hell_enemy() -> void:
+	var visible_count := _visible_rival_count()
+	var rival: RivalDog
+	if visible_count < _rivals.size():
+		rival = _rivals[visible_count]
+	else:
+		rival = RivalDog.new()
+		add_child(rival)
+		_rivals.append(rival)
+		_bind_rival(rival)
+	var occupied_cells: Array[Vector2i] = [_maze.player_spawn_cell, _player.cell]
+	for other in _rivals:
+		if other.visible:
+			occupied_cells.append(other.cell)
+	var spawn_cell := _maze.get_random_safe_spawn_cell(occupied_cells, 6)
+	rival.visible = true
+	rival.set_hell_mode(true)
+	rival.configure(_maze, _player, spawn_cell, _level_config)
+	rival.set_physics_process(true)
+
+
 func _on_player_hit() -> void:
 	if _mode != GameMode.PLAYING:
 		return
+	if _is_hell_game:
+		_level_lives_lost += 1
+		GameState.lose_life()
+		_mode = GameMode.GAME_OVER
+		_set_game_physics(false)
+		_pause_button.visible = false
+		AudioManager.play_sfx("hit")
+		_finish_hell_run()
+		return
 	_level_lives_lost += 1
-	SaveManager.record_life_lost(_is_custom_game)
+	SaveManager.record_life_lost(_blocks_progress())
 	if GameState.lose_life():
 		_mode = GameMode.GAME_OVER
 		_set_game_physics(false)
@@ -270,7 +421,18 @@ func _on_rival_caught() -> void:
 	_player.receive_hit()
 
 
+func _blocks_progress() -> bool:
+	return _is_custom_game or _is_hell_game
+
+
 func _update_status() -> void:
+	if _is_hell_game:
+		_status.text = "MODO INFIERNO  NIVEL %02d\nTIEMPO %s  PERROS %02d" % [
+			GameState.level,
+			HellRules.format_time(_hell_time),
+			_visible_rival_count(),
+		]
+		return
 	var mode_label := "PERSONALIZADA" if _is_custom_game else "NIVEL"
 	_status.text = "%s %02d/30  IA %02d%%\nPUNTOS %05d  VIDAS %d" % [mode_label, GameState.level, int(_level_config.map_difficulty * 100.0), GameState.score, GameState.lives]
 
@@ -376,7 +538,7 @@ func _on_rewarded_failed(reason: String) -> void:
 
 
 func _finish_run_if_needed() -> void:
-	if _is_custom_game or _run_finished_counted:
+	if _is_custom_game or _is_hell_game or _run_finished_counted:
 		return
 	_run_finished_counted = true
 	SaveManager.record_run_finished()
@@ -389,7 +551,9 @@ func _return_to_menu() -> void:
 	_set_game_physics(false)
 	_mode = GameMode.MENU
 	_waiting_interstitial = false
+	_interstitial_action = InterstitialAction.NONE
 	_pending_next_level = 0
+	_hell_time = 0.0
 	_maze.visible = false
 	_player.visible = false
 	for rival in _rivals:
@@ -400,7 +564,10 @@ func _return_to_menu() -> void:
 	_status_frame.visible = false
 	_menu.visible = true
 	_is_custom_game = false
+	_is_hell_game = false
 	_custom_panel.visible = false
+	_hell_screen.visible = false
+	_update_hell_button()
 	$UI/Menu/HighScore.text = "RECORD  %04d\nNIVEL MAXIMO  %02d" % [SaveManager.high_score, SaveManager.highest_level]
 
 
@@ -418,6 +585,40 @@ func _open_customization() -> void:
 	_customization_screen.open()
 
 
+func _open_hell_menu() -> void:
+	if _mode != GameMode.MENU or not SaveManager.has_completed_normal_game():
+		return
+	_is_custom_game = false
+	_is_hell_game = false
+	_menu.visible = false
+	_hell_screen.open()
+
+
+func _close_hell_screen() -> void:
+	_hell_screen.visible = false
+	_menu.visible = true
+
+
+func _start_hell_game(level_number: int) -> void:
+	_hell_level = clampi(level_number, 1, HellRules.LEVEL_COUNT)
+	_is_custom_game = false
+	_is_hell_game = true
+	_custom_panel.visible = false
+	_mode = GameMode.MENU
+	_start_game()
+
+
+func _on_hell_level_selected(level_number: int) -> void:
+	_hell_screen.visible = false
+	_start_hell_game(level_number)
+
+
+func _update_hell_button() -> void:
+	var unlocked := SaveManager.has_completed_normal_game()
+	_hell_button.disabled = not unlocked
+	_hell_button.text = "MODO INFIERNO" if unlocked else "MODO INFIERNO (BLOQ.)"
+
+
 func _close_progress_screens() -> void:
 	_achievements_screen.visible = false
 	_customization_screen.visible = false
@@ -431,6 +632,13 @@ func _build_progress_screens() -> void:
 	_customization_screen = CustomizationScreen.new()
 	$UI.add_child(_customization_screen)
 	_customization_screen.closed.connect(_close_progress_screens)
+
+
+func _build_hell_screen() -> void:
+	_hell_screen = HellSelectScreen.new()
+	$UI.add_child(_hell_screen)
+	_hell_screen.closed.connect(_close_hell_screen)
+	_hell_screen.level_selected.connect(_on_hell_level_selected)
 
 
 func _build_unlock_toast() -> void:
@@ -539,6 +747,7 @@ func _start_custom_game() -> void:
 		return
 	SaveManager.record_custom_config(_custom_config)
 	_is_custom_game = true
+	_is_hell_game = false
 	_custom_panel.visible = false
 	_mode = GameMode.MENU
 	_start_game()
@@ -675,6 +884,7 @@ func _configure_rivals() -> void:
 	var occupied_cells: Array[Vector2i] = [_maze.player_spawn_cell]
 	for index in _rivals.size():
 		var rival := _rivals[index]
+		rival.set_hell_mode(false)
 		if index >= _level_config.rival_count:
 			rival.visible = false
 			rival.stop_movement()

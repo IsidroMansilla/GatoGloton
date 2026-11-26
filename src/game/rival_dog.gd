@@ -18,11 +18,17 @@ var direction: Vector2i = Vector2i.LEFT
 var target_position: Vector2
 var state: RivalState = RivalState.SCATTER
 var movement_enabled: bool = true
+var hell_mode: bool = false
 var move_speed: float = MOVE_SPEED
 var state_duration: float = STATE_DURATION
 var _state_time: float = 0.0
 var _frightened_time_left: float = 0.0
 var _collision_cooldown: float = 0.0
+
+
+func set_hell_mode(value: bool) -> void:
+	hell_mode = value
+	queue_redraw()
 
 
 func configure(world: Maze, target_player: Player, start_cell: Vector2i = Vector2i(10, 9), level_config: LevelConfig = null) -> void:
@@ -136,6 +142,9 @@ func _distance_to_target(from_cell: Vector2i, target: Vector2i) -> int:
 
 
 func _draw() -> void:
+	if hell_mode:
+		_draw_demon()
+		return
 	var palette := _cosmetic_palette("rival")
 	var frightened: Color = palette.get("frightened", Color("#60A5FA"))
 	var rust: Color = palette.get("secondary", Color("#B45309"))
@@ -170,6 +179,40 @@ func _draw() -> void:
 	draw_circle(Vector2(2.3, -2.7), 0.7, outline)
 	draw_circle(Vector2(0.0, 3.4), 1.2, Color("#0B0F19"))
 	draw_line(Vector2(-1.7, 4.3), Vector2(1.7, 4.3), Color(0.0, 0.0, 0.0, 0.45), 1.0)
+
+
+func _draw_demon() -> void:
+	var body := Color("#DC2626")
+	var outline := Color("#7F1D1D")
+	var horn := Color("#450A0A")
+	var eye := Color("#FDE68A")
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-4.6, -4.0),
+		Vector2(-7.2, -11.2),
+		Vector2(-2.0, -6.2),
+	]), horn)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(4.6, -4.0),
+		Vector2(7.2, -11.2),
+		Vector2(2.0, -6.2),
+	]), horn)
+	draw_circle(Vector2.ZERO, 6.2, outline)
+	draw_circle(Vector2.ZERO, 5.5, body)
+	draw_circle(Vector2(-2.2, -1.2), 1.3, eye)
+	draw_circle(Vector2(2.2, -1.2), 1.3, eye)
+	draw_circle(Vector2(-2.2, -1.2), 0.55, Color("#111827"))
+	draw_circle(Vector2(2.2, -1.2), 0.55, Color("#111827"))
+	draw_line(Vector2(-3.0, 2.6), Vector2(3.0, 2.6), Color("#450A0A"), 1.3)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-2.2, 2.6),
+		Vector2(-1.4, 2.6),
+		Vector2(-1.8, 4.2),
+	]), Color("#F8FAFC"))
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(1.4, 2.6),
+		Vector2(2.2, 2.6),
+		Vector2(1.8, 4.2),
+	]), Color("#F8FAFC"))
 
 
 func _cosmetic_palette(category: String) -> Dictionary:

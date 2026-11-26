@@ -56,6 +56,25 @@ Las partidas personalizadas:
 - No generan recompensas de progreso.
 - Sirven para practicar y experimentar.
 
+### 2.3. Modo Infierno
+
+Se desbloquea al completar los 30 niveles del modo progresion. Permite elegir
+libremente cualquiera de los 30 niveles existentes.
+
+- Objetivo: sobrevivir el mayor tiempo posible.
+- Sin bolas de pelo ni power-ups; la partida solo termina al morir.
+- Una unica vida, sin reapariciones.
+- Comienza con un demonio y aparecen mas cada pocos segundos.
+- La curva de aparicion acelera hasta volverse practicamente imposible.
+- HUD con cronometro y numero de demonios.
+- Al morir se muestra un interstitial y despues los resultados.
+- Los resultados muestran el tiempo, el record por nivel y una insignia de
+  `NUEVO RECORD!` cuando corresponde.
+- Acciones disponibles: `VOLVER A INTENTARLO` y `VOLVER AL MENU`.
+- Los records de tiempo se guardan por nivel.
+- Las partidas de infierno no alteran estadisticas, logros ni desbloqueos del
+  modo normal.
+
 ## 3. Reglas de una partida
 
 - Una partida finaliza al perder todas las vidas.
@@ -309,11 +328,26 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 - [x] Crear musica desbloqueable.
 - [x] Validar contraste y visibilidad de todos los estilos.
 
+### Fase 9.5: Modo Infierno
+
+- [x] Desbloquearlo al completar los 30 niveles del modo normal.
+- [x] Crear selector libre de los 30 niveles.
+- [x] Implementar supervivencia sin pellets y con una unica vida.
+- [x] Implementar oleadas progresivas de demonios.
+- [x] Añadir cronometro y HUD especifico.
+- [x] Aplicar tema infernal al laberinto y convertir a los rivales en demonios.
+- [x] Mostrar interstitial al morir y resultados despues del anuncio.
+- [x] Guardar records de tiempo por nivel.
+- [x] Añadir botones `VOLVER A INTENTARLO` y `VOLVER AL MENU`.
+- [x] Aislar el modo de estadisticas, logros y desbloqueos normales.
+- [x] Añadir pruebas de reglas, tiempo y ausencia de coleccionables.
+
 ### Fase 10: Publicacion y calidad
 
 - [x] Ejecutar importacion headless sin errores.
 - [x] Ejecutar pruebas de logica y guardado.
 - [x] Probar menu, personalizado, pausa y game over en Android real.
+- [ ] Probar el modo infierno completo en Android real.
 - [ ] Probar rendimiento con el nivel 30.
 - [ ] Verificar ausencia de crashes en logcat.
 - [ ] Generar AAB release firmado.
@@ -328,6 +362,7 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 - `SaveManager`: persistencia versionada.
 - `ProgressionManager`: niveles y dificultad progresiva.
 - `CustomGameConfig`: configuracion personalizada.
+- `HellRules`: reglas, tiempos y curva de oleadas del modo infierno.
 - `AchievementManager`: logros y progreso.
 - `UnlockManager`: requisitos y desbloqueos.
 - `CosmeticManager`: estilos seleccionados.
@@ -342,10 +377,11 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 ## 11. Definicion de hecho
 
 - La aplicacion arranca sin errores en desktop y Android.
-- El menu permite acceder a los dos modos.
+- El menu permite acceder a los modos progresion, personalizado e infierno.
 - El modo progresion contiene los 30 niveles iniciales.
 - El modo personalizado respeta el nivel maximo desbloqueado.
-- Las partidas personalizadas no alteran logros ni progreso.
+- El modo infierno se desbloquea al completar los 30 niveles.
+- Las partidas personalizadas y de infierno no alteran logros ni progreso normal.
 - El respawn siempre usa una posicion valida y segura.
 - El game over ofrece las acciones definidas.
 - El guardado sobrevive al cierre y reapertura de la aplicacion.

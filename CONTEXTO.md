@@ -10,7 +10,7 @@
 - Plataforma objetivo: Android / Google Play.
 - Orientacion: portrait.
 - Resolucion logica: `360x640`, stretch `canvas_items`.
-- Estado: base jugable completa, guardado ampliado, logros, personalizaciÃ³n visual y audio desbloqueable; pendientes balance final, rendimiento y publicaciÃ³n.
+- Estado: base jugable completa, guardado ampliado, logros, personalización visual y audio desbloqueable, modo infierno; pendientes balance final, rendimiento y publicación.
 
 ## Entorno
 
@@ -23,6 +23,9 @@
 - Export templates Mono 4.7.2 instalados.
 - Android build template instalado en `android\build`.
 - APK debug probado en un Redmi Note 9 Pro conectado por ADB.
+- En ejecuciones de escritorio debug (no headless ni Android), `DevUnlock`
+  desbloquea automaticamente todos los logros, cosmeticos, el nivel 30 y el
+  modo infierno para pruebas integrales.
 
 ## Estructura importante
 
@@ -32,10 +35,10 @@ export_presets.cfg
 AGENTS.md
 CONTEXTO.md
 OBJETIVOS.md
-src/autoload/               # estado, guardado, progresion, logros, desbloqueos, audio y anuncios
+src/autoload/               # estado, guardado, progresion, logros, desbloqueos, audio, anuncios y DevUnlock
 src/ads/                    # backends MockAds y AdMob/UMP
 src/game/                   # Main, Maze, Player, RivalDog, pantallas y menu
-src/data/                   # niveles, mapas, logros, cosmeticos y config personalizada
+src/data/                   # niveles, mapas, logros, cosmeticos, reglas de infierno y config personalizada
 assets/fonts/               # Press Start 2P y tema arcade
 assets/maps/                # PNG de referencia de los 30 niveles
 assets/store/               # recursos de Google Play
@@ -48,7 +51,7 @@ android/                    # plantilla de exportacion Android
 
 ### Bucle jugable
 
-- Menu inicial retro con `INICIAR`, `MODO PERSONALIZADO`, `LOGROS` y `PERSONALIZAR`.
+- Menu inicial retro con `INICIAR`, `MODO PERSONALIZADO`, `LOGROS`, `PERSONALIZAR` y `MODO INFIERNO` (bloqueado hasta completar el modo normal).
 - Movimiento grid-locked por teclado, WASD y swipe.
 - Mapas con paredes de bloques completos y rutas conectadas.
 - Bolas de pelo, power-ups, puntuacion, vidas y respawn seguro.
@@ -67,6 +70,21 @@ android/                    # plantilla de exportacion Android
   con un unico boton `NIVEL N` para comenzar el siguiente nivel.
 - Nivel maximo guardado en `user://save.json`.
 
+### Modo Infierno
+
+- Se desbloquea al completar los 30 niveles del modo progresion.
+- Selector libre para jugar cualquiera de los 30 niveles.
+- Supervivencia sin bolas de pelo ni power-ups; la partida solo termina al morir.
+- Una unica vida y muerte instantanea, sin reapariciones.
+- Empieza con un demonio y aparecen mas cada pocos segundos sin limite hasta que la partida termina.
+- HUD con cronometro de supervivencia y numero de perseguidores.
+- Al morir se muestra un interstitial y despues la pantalla de resultados.
+- Resultados con tiempo total, aviso `NUEVO RECORD!`, `VOLVER A INTENTARLO` y
+  `VOLVER AL MENU`.
+- Records de tiempo por nivel guardados en `user://save.json`.
+- Laberinto rojo con llamas y rivales convertidos en demonios rojos.
+- No altera estadisticas, records, logros ni desbloqueos del modo normal.
+
 ### Guardado y estadisticas
 
 - Esquema versionado v3 compatible con saves v1, v2 y sin version.
@@ -75,7 +93,9 @@ android/                    # plantilla de exportacion Android
   completados, niveles sin dano, pellets, power-ups, rivales comidos y vidas perdidas.
 - Prepara persistencia de logros, desbloqueos y cosmeticos seleccionados.
 - Guarda la ultima configuracion del modo personalizado y la reutiliza al abrirlo.
-- Las partidas personalizadas no alteran estadisticas, records, logros ni desbloqueos.
+- Guarda los mejores tiempos del modo infierno por nivel.
+- Las partidas personalizadas y las de infierno no alteran estadisticas, records,
+  logros ni desbloqueos del modo normal.
 - Save ausente, corrupto o de version futura se maneja sin romper el arranque.
 
 ### Logros y desbloqueos
@@ -106,8 +126,10 @@ android/                    # plantilla de exportacion Android
 
 - Fuente `PressStart2P-Regular.ttf` bajo OFL 1.1.
 - Tema arcade compartido en `assets/fonts/arcade_theme.tres`.
-- HUD en tabla horizontal con nivel, IA, puntos y vidas.
-- Menus de pausa, game over y modo personalizado con tarjetas retro.
+- HUD en tabla horizontal con nivel, IA, puntos y vidas; en infierno muestra
+  cronometro y numero de demonios.
+- Menus de pausa, game over, modo personalizado, logros, personalizacion e
+  infierno con tarjetas retro.
 - Laberinto centrado horizontal y verticalmente.
 - Arte vectorial original sin marcas ni recursos de terceros incompatibles.
 
@@ -115,18 +137,19 @@ android/                    # plantilla de exportacion Android
 
 El runner `tests/test_runner.gd` valida los 30 niveles sin depender de Android ni
 de la IA. Comprueba configuracion, dimensiones, conectividad, ruta de cobertura,
-recogida de pellets y spawns seguros.
+recogida de pellets, spawns seguros y ausencia de coleccionables en infierno.
 
 El runner `tests/save_test_runner.gd` valida guardado, migraciones v1/v2, archivo
-ausente, corrupto, version futura, tipos invalidos, escritura fallida y el
-aislamiento de las partidas personalizadas.
+ausente, corrupto, version futura, tipos invalidos, escritura fallida, records de
+tiempo del modo infierno y el aislamiento de modos especiales.
 
 El runner `tests/progression_test_runner.gd` valida los catalogos de logros,
 cosmeticos y audio, el calculo de progreso, las reglas de desbloqueo, el contraste
-visual, la generacion de pistas musicales y el cierre del interstitial simulado.
+visual, la generacion de pistas musicales, el cierre del interstitial simulado y
+las reglas y curva de oleadas del modo infierno.
 
-Resultado validado actualmente: `380 passed, 0 failed` en mapas, `97 passed, 0 failed`
-en guardado y `88 passed, 0 failed` en progresion.
+Resultado validado actualmente: `410 passed, 0 failed` en mapas, `106 passed, 0 failed`
+en guardado y `95 passed, 0 failed` en progresion.
 
 Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 `Start-Process -Wait -PassThru`, porque el ejecutable Mono puede dejar
@@ -135,6 +158,7 @@ Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 ## Pendientes principales
 
 - Balancear la progresion completa jugando niveles iniciales, intermedios y finales.
+- Balancear la curva de oleadas del modo infierno en Android real.
 - Probar rendimiento del nivel 30 en Android.
 - Generar AAB release, completar Play Console y realizar closed testing 12/14.
 

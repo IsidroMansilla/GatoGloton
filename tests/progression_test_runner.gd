@@ -21,6 +21,7 @@ func _initialize() -> void:
 	_test_manager_api()
 	_test_audio_styles()
 	_test_ads_interstitial()
+	_test_hell_rules()
 	await process_frame
 	print("Progression test: %d passed, %d failed" % [passed, failed])
 	if failed > 0 or not _uses_quit_after:
@@ -135,6 +136,18 @@ func _test_audio_styles() -> void:
 	_check(night != null and night.data.size() > 0, "genera pista de musica nocturna")
 	var invalid: AudioStreamWAV = audio.call("_build_music_stream", "invalida")
 	_check(invalid == null, "pista de musica invalida no se genera")
+
+
+func _test_hell_rules() -> void:
+	_check(HellRules.LEVEL_COUNT == 30, "infierno permite los 30 niveles")
+	_check(HellRules.PLAYER_LIVES == 1, "infierno usa una vida")
+	var hell_script := load("res://src/data/hell_rules.gd")
+	var hell_constants: Dictionary = hell_script.get_script_constant_map()
+	_check(not hell_constants.has("MAX_ENEMIES"), "infierno sin limite de demonios")
+	_check(is_equal_approx(HellRules.spawn_interval(0.0), HellRules.SPAWN_INTERVAL_START), "intervalo inicial de oleadas")
+	_check(is_equal_approx(HellRules.spawn_interval(600.0), HellRules.SPAWN_INTERVAL_MIN), "intervalo minimo de oleadas")
+	_check(HellRules.format_time(0.0) == "00:00.0", "formato de tiempo inicial")
+	_check(HellRules.format_time(65.4) == "01:05.4", "formato de tiempo con minutos")
 
 
 func _test_ads_interstitial() -> void:

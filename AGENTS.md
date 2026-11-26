@@ -1,4 +1,4 @@
-# AGENTS.md â€” Gato Gloton
+# AGENTS.md — Gato Gloton
 
 Guia operativa del proyecto para agentes de IA (opencode) y para cualquier persona que toque el repo. Leer antes de editar.
 
@@ -10,7 +10,7 @@ Arcade de laberinto 2D para Android, en estilo Pac-Man pero con IP propia: un ga
 - Plataforma objetivo: Android (Play Store), `minSdk 24`, `targetSdk 36`, `arm64-v8a`.
 - Vista: **portrait**, viewport base 360x640, `stretch=canvas_items`, `aspect=keep`.
 - Arte: vector plano original. Sin assets ni marcas de terceros.
-- Estado actual: base jugable completa, 30 niveles progresivos, modo personalizado, game over con rewarded, logros, desbloqueos, personalizacion visual y de audio, UI retro y pruebas headless.
+- Estado actual: base jugable completa, 30 niveles progresivos, modo personalizado, modo infierno, game over con rewarded, logros, desbloqueos, personalizacion visual y de audio, UI retro y pruebas headless.
 
 ## 2. Comandos
 
@@ -48,10 +48,10 @@ Variables de release (Godot las lee directamente):
 ```
 project.godot
 export_presets.cfg          # presets "Android" (APK) y "Google Play" (AAB)
-src/autoload/               # singletons: GameState, SaveManager, ProgressionManager, AchievementManager, UnlockManager, AudioManager, AdsManager
+src/autoload/               # singletons: GameState, SaveManager, ProgressionManager, AchievementManager, UnlockManager, AudioManager, AdsManager, DevUnlock
 src/ads/                    # AdsBackend, MockAds, AdMobBackend
-src/game/                   # escenas y scripts de juego (main, maze, player, rival_dog, pantallas)
-src/data/                   # niveles, mapas, logros, cosmeticos y modo personalizado
+src/game/                   # escenas y scripts de juego (main, maze, player, rival_dog, pantallas, hell_select_screen)
+src/data/                   # niveles, mapas, logros, cosmeticos, reglas de infierno y modo personalizado
 assets/                     # sprites, audio, fuentes, mapas, icono y recursos de tienda
 tests/                      # runner headless y pruebas de cobertura de mapas
 scripts/                    # build, validacion y renderizado
@@ -74,16 +74,18 @@ scripts/                    # build, validacion y renderizado
 
 - **Autoloads**
   - `GameState`: score, vidas, nivel, modo personalizado y senales de cambio.
-  - `SaveManager`: JSON versionado v3 en `user://save.json`, record, nivel maximo, estadisticas, logros/desbloqueos/cosmeticos y ultima config personalizada.
+  - `SaveManager`: JSON versionado v3 en `user://save.json`, record, nivel maximo, estadisticas, logros/desbloqueos/cosmeticos, ultima config personalizada y records de tiempo del modo infierno.
   - `ProgressionManager`: catalogo y avance de los 30 niveles progresivos.
   - `AchievementManager`: catalogo, progreso y notificaciones de los 17 logros.
   - `UnlockManager`: reglas, seleccion y paletas de los cosmeticos desbloqueables.
   - `AudioManager`: volumen/mute, reproduccion de SFX y musica.
   - `AdsManager`: fachada sobre `AdsBackend`; elige `MockAds` en desktop/editor y `AdMobBackend` en Android.
+  - `DevUnlock`: en ejecuciones de escritorio debug (no headless ni Android) desbloquea automaticamente todos los logros, cosmeticos, el nivel 30 y el modo infierno para pruebas integrales.
 - **Juego**
-  - `Main`: state machine `Menu -> Playing -> Paused -> GameOver -> LevelClear`.
-  - `Maze`: mapas generados en celdas completas, pellets, conectividad y respawn seguro.
-  - `Player`, `RivalDog`: movimiento grid-locked y estados de IA.
+  - `Main`: state machine `Menu -> Playing -> Paused -> GameOver -> LevelClear`, con flujos separados para progresion, modo personalizado y modo infierno.
+  - `Maze`: mapas generados en celdas completas, pellets, conectividad, respawn seguro y tema infernal con paredes de fuego.
+  - `Player`, `RivalDog`: movimiento grid-locked y estados de IA; en infierno los rivales se dibujan como demonios rojos.
+  - **Modo infierno**: desbloqueado al ganar una partida normal, selector libre de 30 niveles, una vida, sin pellets, cronometro y oleadas progresivas de demonios.
   - `HUD`: tabla retro con nivel, IA, puntos y vidas.
 - **IA de rivales**: estados `Scatter/Chase/Frightened`, velocidad y agresividad configurables, sin A*.
 
@@ -93,7 +95,7 @@ scripts/                    # build, validacion y renderizado
 - En Android, **UMP/consentimiento antes de cargar** cualquier anuncio.
 - La inicializacion de `MobileAds` v5 es **asincrona**: no cargar ads hasta el callback.
 - IDs de prueba en debug. Nunca hacer clic en anuncios propios.
-- Rewarded: "continuar" una vez por partida. Interstitial: al completar cada nivel progresivo (salvo el nivel 30), mostrando despues un menu con un unico boton `NIVEL N`; si no esta listo, se omite. Banner solo en menu.
+- Rewarded: "continuar" una vez por partida. Interstitial: al completar cada nivel progresivo (salvo el nivel 30) y al morir en modo infierno, mostrando despues el menu o los resultados; si no esta listo, se omite. Banner solo en menu.
 - Plugin previsto: `poingstudios/godot-admob-plugin` v5.x (Godot >= 4.5).
 
 ## 7. Android y Google Play
@@ -126,7 +128,7 @@ scripts/                    # build, validacion y renderizado
 
 - `godot --headless --path . --import` termina sin errores.
 - La app arranca en desktop y en un Android real sin crashes.
-- `tests/test_runner.gd`, `tests/save_test_runner.gd` y `tests/progression_test_runner.gd` en verde: validan los 30 mapas, la cobertura de pellets, el guardado, las migraciones, los logros, los desbloqueos, el contraste y el audio.
+- `tests/test_runner.gd`, `tests/save_test_runner.gd` y `tests/progression_test_runner.gd` en verde: validan los 30 mapas, la cobertura de pellets, el guardado, las migraciones, los logros, los desbloqueos, el contraste, el audio y las reglas del modo infierno.
 - Sin secretos ni arte con licencia incompatible en el diff.
 - Diff pequeno, con mensaje de commit claro.
 

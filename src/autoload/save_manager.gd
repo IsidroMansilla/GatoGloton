@@ -37,6 +37,7 @@ var achievements: Dictionary = {}
 var unlocks: Dictionary = {}
 var cosmetics: Dictionary = {}
 var last_custom_config: Dictionary = {}
+var hell_best_times: Dictionary = {}
 var save_path: String = SAVE_PATH
 
 
@@ -150,6 +151,26 @@ func get_last_custom_config() -> Dictionary:
 	return last_custom_config.duplicate(true)
 
 
+func has_completed_normal_game() -> bool:
+	return int(stats.get("runs_won", 0)) > 0
+
+
+func get_hell_best_time(level_number: int) -> float:
+	return float(hell_best_times.get(str(level_number), 0.0))
+
+
+func record_hell_time(level_number: int, seconds: float) -> bool:
+	if level_number < 1 or level_number > 30 or seconds <= 0.0:
+		return false
+	var key := str(level_number)
+	var previous := float(hell_best_times.get(key, 0.0))
+	if seconds <= previous:
+		return false
+	hell_best_times[key] = seconds
+	save_game()
+	return true
+
+
 func get_stats() -> Dictionary:
 	return stats.duplicate(true)
 
@@ -259,6 +280,7 @@ func _build_data() -> Dictionary:
 		"unlocks": unlocks.duplicate(true),
 		"cosmetics": cosmetics.duplicate(true),
 		"last_custom_config": last_custom_config.duplicate(true),
+		"hell_best_times": hell_best_times.duplicate(true),
 	}
 
 
@@ -270,6 +292,7 @@ func _reset_to_defaults() -> void:
 	unlocks = {}
 	cosmetics = DEFAULT_COSMETICS.duplicate(true)
 	last_custom_config = {}
+	hell_best_times = {}
 
 
 func _default_stats() -> Dictionary:
@@ -322,6 +345,7 @@ func _migrate_v2_to_v3(data: Dictionary) -> Dictionary:
 	result["unlocks"] = _sanitize_bool_dict(result.get("unlocks", {}))
 	result["cosmetics"] = _sanitize_cosmetics(result.get("cosmetics", {}))
 	result["last_custom_config"] = _sanitize_custom_config(result.get("last_custom_config", {}))
+	result["hell_best_times"] = _sanitize_hell_times(result.get("hell_best_times", {}))
 	result["version"] = 3
 	return result
 
@@ -338,6 +362,7 @@ func _apply_data(data: Dictionary) -> void:
 	unlocks = _sanitize_bool_dict(data.get("unlocks", {}))
 	cosmetics = _sanitize_cosmetics(data.get("cosmetics", {}))
 	last_custom_config = _sanitize_custom_config(data.get("last_custom_config", {}))
+	hell_best_times = _sanitize_hell_times(data.get("hell_best_times", {}))
 
 
 func _sanitize_int_dict(raw: Variant) -> Dictionary:
@@ -386,6 +411,20 @@ func _sanitize_custom_config(raw: Variant) -> Dictionary:
 		"map_difficulty": clampf(float(data.get("map_difficulty", 0.0)), GameLimits.MIN_MAP_DIFFICULTY, GameLimits.MAX_MAP_DIFFICULTY),
 		"power_up_count": clampi(int(data.get("power_up_count", 1)), GameLimits.MIN_POWER_UP_COUNT, GameLimits.MAX_POWER_UP_COUNT),
 	}
+
+
+func _sanitize_hell_times(raw: Variant) -> Dictionary:
+	var result := {}
+	if typeof(raw) != TYPE_DICTIONARY:
+		return result
+	for key: Variant in (raw as Dictionary).keys():
+		var level_number := int(key)
+		if level_number < 1 or level_number > 30:
+			continue
+		var seconds := float((raw as Dictionary)[key])
+		if seconds > 0.0:
+			result[str(level_number)] = seconds
+	return result
 
 
 func _quarantine_corrupt(target: String) -> void:

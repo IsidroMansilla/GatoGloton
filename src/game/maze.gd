@@ -35,6 +35,11 @@ const WALL_COLOR := Color("#2563EB")
 const WALL_EDGE_COLOR := Color("#60A5FA")
 const FLOOR_COLOR := Color("#0B1220")
 const DOT_COLOR := Color("#FDE68A")
+const HELL_WALL_COLOR := Color("#991B1B")
+const HELL_EDGE_COLOR := Color("#F97316")
+const HELL_FLOOR_COLOR := Color("#1A0505")
+const HELL_FLAME_COLOR := Color("#F97316")
+const HELL_FLAME_CORE_COLOR := Color("#FDE68A")
 const PELLET_POINTS: int = 10
 const POWER_PELLET_POINTS: int = 50
 var POWER_PELLET_CELLS: Array[Vector2i] = [Vector2i(19, 1), Vector2i(1, 17), Vector2i(19, 17)]
@@ -45,6 +50,7 @@ var tile_size: float = TILE_SIZE
 var _pellets: Dictionary = {}
 var _effects: Array[Dictionary] = []
 var _walkable_cells: Array[Vector2i] = []
+var hell_mode: bool = false
 var map_id: String = "map_01"
 var player_spawn_cell: Vector2i = Vector2i(1, 1)
 var rival_spawn_cells: Array[Vector2i] = [Vector2i(10, 9)]
@@ -64,6 +70,11 @@ func _process(delta: float) -> void:
 		effect["age"] = float(effect.get("age", 0.0)) + delta
 		if float(effect["age"]) >= float(effect.get("duration", 0.3)):
 			_effects.remove_at(index)
+	queue_redraw()
+
+
+func set_hell_mode(value: bool) -> void:
+	hell_mode = value
 	queue_redraw()
 
 
@@ -101,6 +112,13 @@ func reset_pellets(start_cell: Vector2i, power_up_count: int = POWER_PELLET_CELL
 			var cell := Vector2i(x, y)
 			if is_walkable(cell) and cell != start_cell:
 				_pellets[cell] = POWER_PELLET_POINTS if cell in _active_power_pellet_cells else PELLET_POINTS
+	queue_redraw()
+
+
+func reset_hell() -> void:
+	_pellets.clear()
+	_active_power_pellet_cells.clear()
+	_effects.clear()
 	queue_redraw()
 
 
@@ -189,10 +207,14 @@ func get_random_safe_spawn_cell(occupied_cells: Array[Vector2i] = [], min_distan
 
 
 func _draw() -> void:
-	var palette := _cosmetic_palette("maze")
-	var wall_color: Color = palette.get("wall", WALL_COLOR)
-	var edge_color: Color = palette.get("edge", WALL_EDGE_COLOR)
-	var floor_color: Color = palette.get("floor", FLOOR_COLOR)
+	var wall_color: Color = HELL_WALL_COLOR
+	var edge_color: Color = HELL_EDGE_COLOR
+	var floor_color: Color = HELL_FLOOR_COLOR
+	if not hell_mode:
+		var palette := _cosmetic_palette("maze")
+		wall_color = palette.get("wall", WALL_COLOR)
+		edge_color = palette.get("edge", WALL_EDGE_COLOR)
+		floor_color = palette.get("floor", FLOOR_COLOR)
 	var pellet_palette := _cosmetic_palette("pellets")
 	var pellet_data := _cosmetic_data("pellets")
 	var pellet_color: Color = pellet_palette.get("pellet", DOT_COLOR)
@@ -207,6 +229,8 @@ func _draw() -> void:
 			if not is_walkable(cell):
 				draw_rect(rect.grow(-1.5), wall_color)
 				draw_rect(rect.grow(-3.5), edge_color, false, 1.0)
+				if hell_mode:
+					_draw_hell_flames(rect, cell)
 			elif _pellets.has(cell):
 				var is_power := int(_pellets[cell]) == POWER_PELLET_POINTS
 				var radius := 2.8 if is_power else 1.2
@@ -229,6 +253,20 @@ func _draw() -> void:
 				var angle := TAU * float(index) / 6.0 + progress * 1.5
 				var point := effect_position + Vector2(cos(angle), sin(angle)) * radius
 				draw_circle(point, 1.6 * (1.0 - progress), particle_color)
+
+
+func _draw_hell_flames(rect: Rect2, cell: Vector2i) -> void:
+	var seed := (cell.x * 13 + cell.y * 7) % 6
+	for index in 3:
+		var x := rect.position.x + 3.0 + fmod(float(seed) * 2.7 + float(index) * 4.3, maxf(rect.size.x - 6.0, 1.0))
+		var base_y := rect.position.y + rect.size.y - 2.0
+		var height := 2.0 + float((seed + index) % 3)
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(x - 1.6, base_y),
+			Vector2(x, base_y - height),
+			Vector2(x + 1.6, base_y),
+		]), HELL_FLAME_COLOR)
+		draw_circle(Vector2(x, base_y - height * 0.55), 0.8, HELL_FLAME_CORE_COLOR)
 
 
 func _assert_map_is_valid() -> void:

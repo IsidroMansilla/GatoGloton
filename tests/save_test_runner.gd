@@ -78,6 +78,8 @@ func _test_round_trip() -> void:
 	config.map_difficulty = 0.5
 	config.power_up_count = 2
 	manager.record_custom_config(config)
+	_check(manager.record_hell_time(3, 42.5), "round trip registra record infernal")
+	_check(not manager.record_hell_time(3, 10.0), "record inferior no reemplaza")
 	manager.free()
 
 	_check(FileAccess.file_exists(path), "round trip escribe archivo")
@@ -107,6 +109,9 @@ func _test_round_trip() -> void:
 	_check(int(loaded_config.get("rival_count", 0)) == 3, "round trip conserva numero de rivales")
 	_check(is_equal_approx(float(loaded_config.get("map_difficulty", 0.0)), 0.5), "round trip conserva dificultad")
 	_check(int(loaded_config.get("power_up_count", 0)) == 2, "round trip conserva power-ups")
+	_check(is_equal_approx(loaded.get_hell_best_time(3), 42.5), "round trip conserva record infernal")
+	_check(is_equal_approx(loaded.get_hell_best_time(4), 0.0), "niveles sin record infernal empiezan a 0")
+	_check(loaded.has_completed_normal_game(), "detecta partida normal completada")
 	_check(int(loaded.get_save_data().get("version", 0)) == 3, "round trip guarda version 3")
 	loaded.free()
 
@@ -126,6 +131,7 @@ func _test_v1_migration() -> void:
 	_check(manager.highest_level == 7, "v1 conserva highest_level")
 	_check(manager.get_stats().get("runs_started", -1) == 0, "v1 crea estadisticas por defecto")
 	_check(manager.get_cosmetic("player") == "player_ember", "v1 crea cosmeticos por defecto")
+	_check(is_equal_approx(manager.get_hell_best_time(1), 0.0), "v1 crea records infernales por defecto")
 	_check(int(manager.get_save_data().get("version", 0)) == 3, "v1 migra a version 3")
 	var persisted := _read_json(path)
 	_check(int(persisted.get("version", 0)) == 3, "v1 migrado se persiste en disco")
@@ -222,6 +228,12 @@ func _test_invalid_types() -> void:
 			"map_difficulty": 2.0,
 			"power_up_count": 0,
 		},
+		"hell_best_times": {
+			"3": 12.5,
+			"99": 5.0,
+			"4": -1.0,
+			"x": 2.0,
+		},
 	}))
 	var manager := SAVE_MANAGER_SCRIPT.new()
 	manager.save_path = path
@@ -243,6 +255,9 @@ func _test_invalid_types() -> void:
 	_check(int(config.get("rival_count", 0)) == GameLimits.MAX_RIVAL_COUNT, "rivales altos se acotan")
 	_check(is_equal_approx(float(config.get("map_difficulty", 0.0)), GameLimits.MAX_MAP_DIFFICULTY), "dificultad alta se acota")
 	_check(int(config.get("power_up_count", 0)) == GameLimits.MIN_POWER_UP_COUNT, "power-ups bajos se acotan")
+	_check(is_equal_approx(manager.get_hell_best_time(3), 12.5), "record infernal valido se conserva")
+	_check(is_equal_approx(manager.get_hell_best_time(4), 0.0), "record infernal negativo se descarta")
+	_check(is_equal_approx(manager.get_hell_best_time(99), 0.0), "record infernal fuera de rango se descarta")
 	manager.free()
 
 

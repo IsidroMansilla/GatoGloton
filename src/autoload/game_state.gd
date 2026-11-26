@@ -8,6 +8,7 @@ var score: int = 0
 var lives: int = 3
 var level: int = 1
 var is_custom_game: bool = false
+var is_hell_game: bool = false
 
 
 func reset_run() -> void:
@@ -15,6 +16,7 @@ func reset_run() -> void:
 	lives = 3
 	level = 1
 	is_custom_game = false
+	is_hell_game = false
 	score_changed.emit(score)
 	lives_changed.emit(lives)
 	level_changed.emit(level)
@@ -23,7 +25,7 @@ func reset_run() -> void:
 func add_score(points: int) -> void:
 	score += points
 	score_changed.emit(score)
-	if not is_custom_game:
+	if not is_custom_game and not is_hell_game:
 		SaveManager.record_score(score)
 
 
