@@ -9,6 +9,7 @@ var _uses_quit_after: bool = false
 
 func _initialize() -> void:
 	_uses_quit_after = _detect_quit_after()
+	_check_safe_area()
 	var maze := Maze.new()
 	root.add_child(maze)
 	await process_frame
@@ -34,6 +35,17 @@ func _detect_quit_after() -> bool:
 		if argument == "--quit-after" or argument.begins_with("--quit-after="):
 			return true
 	return false
+
+
+func _check_safe_area() -> void:
+	var tall := SafeAreaPage.compute_safe_rect(Vector2(360.0, 640.0), Vector2(1080.0, 2400.0), Rect2(0.0, 80.0, 1080.0, 2240.0))
+	_check(tall.is_equal_approx(Rect2(Vector2.ZERO, Vector2(360.0, 640.0))), "safe area movil alto no recorta el marco 16:9")
+	var square := SafeAreaPage.compute_safe_rect(Vector2(360.0, 640.0), Vector2(1080.0, 1920.0), Rect2(0.0, 72.0, 1080.0, 1776.0))
+	_check(is_equal_approx(square.position.y, 24.0), "safe area 16:9 desplaza el contenido")
+	_check(is_equal_approx(square.size.y, 592.0), "safe area 16:9 reduce la altura util")
+	_check(is_equal_approx(square.size.x, 360.0), "safe area 16:9 conserva la anchura")
+	var empty := SafeAreaPage.compute_safe_rect(Vector2(360.0, 640.0), Vector2.ZERO, Rect2())
+	_check(empty.is_equal_approx(Rect2(Vector2.ZERO, Vector2(360.0, 640.0))), "safe area sin ventana usa el lienzo completo")
 
 
 func _check_level(level_number: int, maze: Maze, previous_width: int, previous_height: int) -> void:

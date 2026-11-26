@@ -12,6 +12,7 @@ func _ready() -> void:
 	SaveManager.stats_changed.connect(_on_stats_changed)
 	SaveManager.high_score_changed.connect(_on_high_score_changed)
 	SaveManager.highest_level_changed.connect(_on_highest_level_changed)
+	SaveManager.progress_reset.connect(_on_progress_reset)
 	AchievementManager.achievements_changed.connect(_on_achievements_changed)
 	evaluate(false)
 	ensure_selection_valid()
@@ -122,3 +123,8 @@ func _on_highest_level_changed(_value: int) -> void:
 
 func _on_achievements_changed() -> void:
 	evaluate()
+
+
+func _on_progress_reset() -> void:
+	evaluate(false)
+	ensure_selection_valid()

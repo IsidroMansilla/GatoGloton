@@ -1,7 +1,7 @@
 extends Node
 
 const SAVE_PATH := "user://save.json"
-const SAVE_VERSION := 3
+const SAVE_VERSION := 4
 const MIN_SUPPORTED_VERSION := 1
 const STAT_KEYS: PackedStringArray = [
 	"runs_started",
@@ -23,11 +23,21 @@ const DEFAULT_COSMETICS: Dictionary = {
 	"sfx": "sfx_classic",
 	"music": "music_off",
 }
+const DEFAULT_SETTINGS: Dictionary = {
+	"muted": false,
+	"music_volume_db": -6.0,
+	"sfx_volume_db": -3.0,
+	"vibration": true,
+	"reduce_motion": false,
+	"tutorial_seen": false,
+}
 
 signal high_score_changed(value: int)
 signal highest_level_changed(value: int)
 signal stats_changed(stats: Dictionary)
 signal custom_config_changed(config: Dictionary)
+signal settings_changed(settings: Dictionary)
+signal progress_reset
 signal save_failed(path: String)
 
 var high_score: int = 0
@@ -38,6 +48,7 @@ var unlocks: Dictionary = {}
 var cosmetics: Dictionary = {}
 var last_custom_config: Dictionary = {}
 var hell_best_times: Dictionary = {}
+var settings: Dictionary = {}
 var save_path: String = SAVE_PATH
 
 
@@ -149,6 +160,40 @@ func has_custom_config() -> bool:
 
 func get_last_custom_config() -> Dictionary:
 	return last_custom_config.duplicate(true)
+
+
+func get_settings() -> Dictionary:
+	return settings.duplicate(true)
+
+
+func get_setting(key: String, fallback: Variant = null) -> Variant:
+	return settings.get(key, fallback)
+
+
+func set_setting(key: String, value: Variant, persist: bool = true) -> void:
+	if not DEFAULT_SETTINGS.has(key):
+		return
+	var sanitized := _sanitize_settings({key: value})
+	settings[key] = sanitized[key]
+	settings_changed.emit(get_settings())
+	if persist:
+		save_game()
+
+
+func reset_progress() -> void:
+	high_score = 0
+	highest_level = 1
+	stats = _default_stats()
+	achievements = {}
+	unlocks = {}
+	cosmetics = DEFAULT_COSMETICS.duplicate(true)
+	last_custom_config = {}
+	hell_best_times = {}
+	save_game()
+	high_score_changed.emit(high_score)
+	highest_level_changed.emit(highest_level)
+	stats_changed.emit(get_stats())
+	progress_reset.emit()
 
 
 func has_completed_normal_game() -> bool:
@@ -281,6 +326,7 @@ func _build_data() -> Dictionary:
 		"cosmetics": cosmetics.duplicate(true),
 		"last_custom_config": last_custom_config.duplicate(true),
 		"hell_best_times": hell_best_times.duplicate(true),
+		"settings": settings.duplicate(true),
 	}
 
 
@@ -293,6 +339,7 @@ func _reset_to_defaults() -> void:
 	cosmetics = DEFAULT_COSMETICS.duplicate(true)
 	last_custom_config = {}
 	hell_best_times = {}
+	settings = DEFAULT_SETTINGS.duplicate(true)
 
 
 func _default_stats() -> Dictionary:
@@ -321,6 +368,9 @@ func _migrate(data: Dictionary) -> Dictionary:
 	if version == 2:
 		working = _migrate_v2_to_v3(working)
 		version = 3
+	if version == 3:
+		working = _migrate_v3_to_v4(working)
+		version = 4
 	working["version"] = SAVE_VERSION
 	return working
 
@@ -350,6 +400,13 @@ func _migrate_v2_to_v3(data: Dictionary) -> Dictionary:
 	return result
 
 
+func _migrate_v3_to_v4(data: Dictionary) -> Dictionary:
+	var result := data.duplicate(true)
+	result["settings"] = _sanitize_settings(result.get("settings", {}))
+	result["version"] = 4
+	return result
+
+
 func _apply_data(data: Dictionary) -> void:
 	high_score = maxi(0, int(data.get("high_score", 0)))
 	highest_level = maxi(1, int(data.get("highest_level", 1)))
@@ -363,6 +420,7 @@ func _apply_data(data: Dictionary) -> void:
 	cosmetics = _sanitize_cosmetics(data.get("cosmetics", {}))
 	last_custom_config = _sanitize_custom_config(data.get("last_custom_config", {}))
 	hell_best_times = _sanitize_hell_times(data.get("hell_best_times", {}))
+	settings = _sanitize_settings(data.get("settings", {}))
 
 
 func _sanitize_int_dict(raw: Variant) -> Dictionary:
@@ -424,6 +482,33 @@ func _sanitize_hell_times(raw: Variant) -> Dictionary:
 		var seconds := float((raw as Dictionary)[key])
 		if seconds > 0.0:
 			result[str(level_number)] = seconds
+	return result
+
+
+func _sanitize_settings(raw: Variant) -> Dictionary:
+	var result := DEFAULT_SETTINGS.duplicate(true)
+	if typeof(raw) != TYPE_DICTIONARY:
+		return result
+	var data: Dictionary = raw
+	for key: Variant in data.keys():
+		var name := String(key)
+		if not result.has(name):
+			continue
+		var value: Variant = data[key]
+		if typeof(value) == TYPE_BOOL:
+			result[name] = value
+		elif typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT:
+			match name:
+				"muted", "vibration", "reduce_motion", "tutorial_seen":
+					result[name] = float(value) != 0.0
+				"music_volume_db", "sfx_volume_db":
+					result[name] = clampf(float(value), -40.0, 0.0)
+		elif typeof(value) == TYPE_STRING:
+			match name:
+				"muted", "vibration", "reduce_motion", "tutorial_seen":
+					result[name] = String(value).to_lower() in ["true", "1", "si"]
+				"music_volume_db", "sfx_volume_db":
+					result[name] = clampf(String(value).to_float(), -40.0, 0.0)
 	return result
 
 

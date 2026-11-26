@@ -149,9 +149,9 @@ text = "INICIAR"
 [node name="CustomButton" type="Button" parent="UI/Menu"]
 layout_mode = 0
 offset_left = 62.0
-offset_top = 344.0
+offset_top = 342.0
 offset_right = 298.0
-offset_bottom = 386.0
+offset_bottom = 378.0
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("ButtonNormal")
@@ -162,9 +162,9 @@ text = "MODO PERSONALIZADO"
 [node name="AchievementsButton" type="Button" parent="UI/Menu"]
 layout_mode = 0
 offset_left = 62.0
-offset_top = 392.0
+offset_top = 382.0
 offset_right = 298.0
-offset_bottom = 434.0
+offset_bottom = 418.0
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("ButtonNormal")
@@ -175,9 +175,9 @@ text = "LOGROS"
 [node name="CustomizeButton" type="Button" parent="UI/Menu"]
 layout_mode = 0
 offset_left = 62.0
-offset_top = 440.0
+offset_top = 422.0
 offset_right = 298.0
-offset_bottom = 482.0
+offset_bottom = 458.0
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 10
 theme_override_styles/normal = SubResource("ButtonNormal")
@@ -185,12 +185,25 @@ theme_override_styles/pressed = SubResource("ButtonPressed")
 theme_override_styles/hover = SubResource("ButtonHover")
 text = "PERSONALIZAR"
 
+[node name="SettingsButton" type="Button" parent="UI/Menu"]
+layout_mode = 0
+offset_left = 62.0
+offset_top = 462.0
+offset_right = 298.0
+offset_bottom = 498.0
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+theme_override_styles/hover = SubResource("ButtonHover")
+text = "AJUSTES"
+
 [node name="HellButton" type="Button" parent="UI/Menu"]
 layout_mode = 0
 offset_left = 62.0
-offset_top = 488.0
+offset_top = 502.0
 offset_right = 298.0
-offset_bottom = 530.0
+offset_bottom = 538.0
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 9
 theme_override_styles/normal = SubResource("ButtonNormal")
@@ -201,9 +214,9 @@ text = "MODO INFIERNO"
 [node name="Hint" type="Label" parent="UI/Menu" unique_id=655905013]
 layout_mode = 0
 offset_left = 38.0
-offset_top = 536.0
+offset_top = 544.0
 offset_right = 322.0
-offset_bottom = 568.0
+offset_bottom = 572.0
 theme_override_colors/font_color = Color(0.65098, 0.67451, 0.792157, 1)
 theme_override_font_sizes/font_size = 8
 text = "COME. ESCAPA. REPITE.
@@ -213,9 +226,9 @@ horizontal_alignment = 1
 [node name="Footer" type="Label" parent="UI/Menu" unique_id=1983357447]
 layout_mode = 0
 offset_left = 30.0
-offset_top = 576.0
+offset_top = 578.0
 offset_right = 330.0
-offset_bottom = 600.0
+offset_bottom = 602.0
 theme_override_colors/font_color = Color(0.376471, 0.647059, 0.980392, 0.75)
 theme_override_font_sizes/font_size = 7
 text = "INSERT COIN  *  1 JUGADOR"
@@ -311,9 +324,9 @@ horizontal_alignment = 1
 [node name="ResumeButton" type="Button" parent="UI/PauseOverlay"]
 layout_mode = 0
 offset_left = 72.0
-offset_top = 334.0
+offset_top = 328.0
 offset_right = 288.0
-offset_bottom = 390.0
+offset_bottom = 370.0
 theme_override_font_sizes/font_size = 10
 text = "CONTINUAR"
 theme_override_styles/normal = SubResource("ButtonNormal")
@@ -322,20 +335,31 @@ theme_override_styles/pressed = SubResource("ButtonPressed")
 [node name="RestartButton" type="Button" parent="UI/PauseOverlay"]
 layout_mode = 0
 offset_left = 72.0
-offset_top = 404.0
+offset_top = 376.0
 offset_right = 288.0
-offset_bottom = 460.0
+offset_bottom = 418.0
 theme_override_font_sizes/font_size = 10
 text = "REINICIAR"
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+
+[node name="SettingsButton" type="Button" parent="UI/PauseOverlay"]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 424.0
+offset_right = 288.0
+offset_bottom = 466.0
+theme_override_font_sizes/font_size = 9
+text = "AJUSTES"
 theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/pressed = SubResource("ButtonPressed")
 
 [node name="MenuButton" type="Button" parent="UI/PauseOverlay"]
 layout_mode = 0
 offset_left = 72.0
-offset_top = 474.0
+offset_top = 472.0
 offset_right = 288.0
-offset_bottom = 530.0
+offset_bottom = 514.0
 theme_override_font_sizes/font_size = 9
 text = "VOLVER AL MENU"
 theme_override_styles/normal = SubResource("ButtonNormal")

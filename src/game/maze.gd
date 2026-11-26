@@ -142,6 +142,8 @@ func pellets_remaining() -> int:
 
 
 func _spawn_collect_effect(cell: Vector2i, is_power: bool) -> void:
+	if _reduce_motion():
+		return
 	var data := _cosmetic_data("effects")
 	if not bool(data.get("burst", false)):
 		return
@@ -333,3 +335,10 @@ func _cosmetic_data(category: String) -> Dictionary:
 		return {}
 	var result: Dictionary = manager.call("get_data", category)
 	return result
+
+
+func _reduce_motion() -> bool:
+	var manager := get_node_or_null("/root/SaveManager")
+	if manager == null:
+		return false
+	return bool(manager.call("get_setting", "reduce_motion", false))

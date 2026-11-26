@@ -15,13 +15,20 @@ const ARCADE_THEME: Theme = preload("res://assets/fonts/arcade_theme.tres")
 @onready var _pause_message: Label = $UI/PauseOverlay/Message
 @onready var _resume_button: Button = $UI/PauseOverlay/ResumeButton
 @onready var _restart_button: Button = $UI/PauseOverlay/RestartButton
+@onready var _pause_settings_button: Button = $UI/PauseOverlay/SettingsButton
 @onready var _menu_button: Button = $UI/PauseOverlay/MenuButton
 @onready var _menu: Control = $UI/Menu
+@onready var _high_score: Label = $UI/Menu/HighScore
 @onready var _start_button: Button = $UI/Menu/StartButton
 @onready var _custom_button: Button = $UI/Menu/CustomButton
 @onready var _achievements_button: Button = $UI/Menu/AchievementsButton
 @onready var _customize_button: Button = $UI/Menu/CustomizeButton
+@onready var _settings_button: Button = $UI/Menu/SettingsButton
 @onready var _hell_button: Button = $UI/Menu/HellButton
+
+const LEVEL_INTRO_SECONDS: float = 1.2
+const LEVEL_READY_AT: float = 0.6
+const LEVEL_GRACE_SECONDS: float = 1.0
 
 enum GameMode { MENU, PLAYING, PAUSED, GAME_OVER, LEVEL_CLEAR }
 enum InterstitialAction { NONE, NEXT_LEVEL, HELL_RESULTS }
@@ -55,6 +62,12 @@ var _custom_value_labels: Dictionary = {}
 var _achievements_screen: AchievementsScreen
 var _customization_screen: CustomizationScreen
 var _hell_screen: HellSelectScreen
+var _settings_screen: SettingsScreen
+var _tutorial_screen: TutorialScreen
+var _settings_from_pause: bool = false
+var _intro_label: Label
+var _intro_time_left: float = 0.0
+var _grace_time_left: float = 0.0
 var _toast_panel: Panel
 var _toast_label: Label
 var _toast_queue: Array[String] = []
@@ -81,11 +94,14 @@ func _ready() -> void:
 	_custom_button.pressed.connect(_open_custom_menu)
 	_achievements_button.pressed.connect(_open_achievements)
 	_customize_button.pressed.connect(_open_customization)
+	_settings_button.pressed.connect(_open_settings_from_menu)
 	_hell_button.pressed.connect(_open_hell_menu)
 	_pause_button.pressed.connect(_toggle_pause)
 	_resume_button.pressed.connect(_on_resume_button_pressed)
 	_restart_button.pressed.connect(_restart_game)
+	_pause_settings_button.pressed.connect(_open_settings_from_pause)
 	_menu_button.pressed.connect(_return_to_menu)
+	SaveManager.progress_reset.connect(_on_progress_reset)
 	AdsManager.rewarded_completed.connect(_on_rewarded_completed)
 	AdsManager.rewarded_failed.connect(_on_rewarded_failed)
 	AdsManager.interstitial_dismissed.connect(_on_interstitial_dismissed)
@@ -97,16 +113,31 @@ func _ready() -> void:
 	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
 	UnlockManager.cosmetic_unlocked.connect(_on_cosmetic_unlocked)
 	UnlockManager.cosmetics_changed.connect(_on_cosmetics_changed)
-	$UI/Menu/HighScore.text = "RECORD  %04d\nNIVEL MAXIMO  %02d" % [SaveManager.high_score, SaveManager.highest_level]
+	_high_score.text = "RECORD  %04d\nNIVEL MAXIMO  %02d" % [SaveManager.high_score, SaveManager.highest_level]
 	_build_custom_panel()
 	_build_progress_screens()
 	_build_hell_screen()
 	_build_unlock_toast()
+	_build_intro_label()
+	_setup_safe_area()
 	_update_hell_button()
+	if not bool(SaveManager.get_setting("tutorial_seen", false)):
+		_open_tutorial()
 
 
 func _process(delta: float) -> void:
-	if _mode != GameMode.PLAYING or not _is_hell_game:
+	if _mode != GameMode.PLAYING:
+		return
+	if _intro_time_left > 0.0:
+		_intro_time_left = maxf(0.0, _intro_time_left - delta)
+		if _intro_label != null:
+			var ready := _intro_time_left <= LEVEL_INTRO_SECONDS - LEVEL_READY_AT
+			_intro_label.text = "LISTO!" if ready else "NIVEL %02d" % GameState.level
+		if _intro_time_left <= 0.0:
+			_finish_level_intro()
+		return
+	_grace_time_left = maxf(0.0, _grace_time_left - delta)
+	if not _is_hell_game:
 		return
 	_hell_time += delta
 	_hell_spawn_timer -= delta
@@ -174,21 +205,41 @@ func _start_current_level() -> void:
 	_menu.visible = false
 	_status.visible = true
 	_status_frame.visible = true
-	_pause_button.visible = true
+	_pause_button.visible = false
 	_pause_overlay.visible = false
-	_set_game_physics(true)
 	_maze.queue_redraw()
 	_player.queue_redraw()
 	_player.configure(_maze, _maze.player_spawn_cell, _level_config)
 	AudioManager.play_sfx("start")
 	print("[Main] nivel %d iniciado (%s)" % [GameState.level, _level_config.map_id])
 	_update_status()
+	_begin_level_intro()
+
+
+func _begin_level_intro() -> void:
+	_intro_time_left = LEVEL_INTRO_SECONDS
+	_grace_time_left = LEVEL_GRACE_SECONDS
+	_set_game_physics(false)
+	if _intro_label != null:
+		_intro_label.text = "NIVEL %02d" % GameState.level
+		_intro_label.visible = true
+
+
+func _finish_level_intro() -> void:
+	_intro_time_left = 0.0
+	_set_game_physics(true)
+	_pause_button.visible = true
+	if _intro_label != null:
+		_intro_label.visible = false
+	if _is_hell_game:
+		_hell_spawn_timer = HellRules.spawn_interval(_hell_time)
 
 
 func _on_pellet_collected(points: int) -> void:
 	GameState.add_score(points)
 	SaveManager.record_pellet_collected(_blocks_progress())
 	AudioManager.play_sfx("pellet")
+	HapticsManager.pulse("pellet")
 	_update_status()
 
 
@@ -198,6 +249,7 @@ func _on_power_pellet_collected() -> void:
 		if rival.visible:
 			rival.set_frightened(8.0)
 	AudioManager.play_sfx("power")
+	HapticsManager.pulse("power")
 	_status.text = "NIVEL %02d/30  IA %02d%%\nPUNTOS %05d  VIDAS %d" % [GameState.level, int(_level_config.map_difficulty * 100.0), GameState.score, GameState.lives]
 
 
@@ -205,6 +257,7 @@ func _on_rival_eaten() -> void:
 	GameState.add_score(200)
 	SaveManager.record_rival_eaten(_blocks_progress())
 	AudioManager.play_sfx("eat")
+	HapticsManager.pulse("eat")
 	_update_status()
 
 
@@ -215,6 +268,7 @@ func _on_level_completed() -> void:
 	_set_game_physics(false)
 	_pause_button.visible = false
 	AudioManager.play_sfx("complete")
+	HapticsManager.pulse("complete")
 	var completed_level := GameState.level
 	if _is_custom_game:
 		_show_result_overlay("PARTIDA COMPLETADA", "Mapa personalizado superado\nPuntos: %d" % GameState.score)
@@ -247,6 +301,7 @@ func _show_level_break_wait(completed_level: int) -> void:
 	_resume_button.visible = false
 	_resume_button.disabled = true
 	_restart_button.visible = false
+	_pause_settings_button.visible = false
 	_menu_button.visible = false
 	_pause_overlay.visible = true
 
@@ -293,6 +348,7 @@ func _show_next_level_menu(next_level: int) -> void:
 	_resume_button.visible = true
 	_resume_button.disabled = false
 	_restart_button.visible = false
+	_pause_settings_button.visible = false
 	_menu_button.visible = false
 	_pause_overlay.visible = true
 
@@ -325,6 +381,7 @@ func _show_hell_wait() -> void:
 	_resume_button.visible = false
 	_resume_button.disabled = true
 	_restart_button.visible = false
+	_pause_settings_button.visible = false
 	_menu_button.visible = false
 	_pause_overlay.visible = true
 
@@ -333,10 +390,13 @@ func _show_hell_results() -> void:
 	_pause_title.text = "MODO INFIERNO"
 	var best := SaveManager.get_hell_best_time(_hell_level)
 	var record_text := "NUEVO RECORD!" if _hell_new_record else "MEJOR " + HellRules.format_time(best)
+	if _hell_new_record:
+		HapticsManager.pulse("record")
 	_pause_message.text = "Tiempo: %s\n%s" % [HellRules.format_time(_hell_final_time), record_text]
 	_resume_button.visible = false
 	_restart_button.visible = true
 	_restart_button.text = "VOLVER A INTENTARLO"
+	_pause_settings_button.visible = false
 	_menu_button.text = "VOLVER AL MENU"
 	_menu_button.visible = true
 	_pause_overlay.visible = true
@@ -386,6 +446,9 @@ func _spawn_hell_enemy() -> void:
 func _on_player_hit() -> void:
 	if _mode != GameMode.PLAYING:
 		return
+	if _intro_time_left > 0.0 or _grace_time_left > 0.0:
+		return
+	HapticsManager.pulse("hit")
 	if _is_hell_game:
 		_level_lives_lost += 1
 		GameState.lose_life()
@@ -439,30 +502,38 @@ func _update_status() -> void:
 
 func _toggle_pause() -> void:
 	if _mode == GameMode.PLAYING:
-		_mode = GameMode.PAUSED
-		_set_game_physics(false)
-		_pause_button.visible = false
-		_pause_title.text = "PAUSA"
-		_pause_message.text = "La partida esta detenida"
-		_resume_button.visible = true
-		_resume_button.disabled = false
-		_resume_button.text = "CONTINUAR"
-		_restart_button.text = "REINICIAR"
-		_menu_button.text = "SALIR"
-		_menu_button.visible = true
-		_pause_overlay.visible = true
-		AudioManager.play_sfx("pause")
+		_pause_game()
 	elif _mode == GameMode.PAUSED:
 		_resume_game()
+
+
+func _pause_game() -> void:
+	if _mode != GameMode.PLAYING or _intro_time_left > 0.0:
+		return
+	_mode = GameMode.PAUSED
+	_set_game_physics(false)
+	_pause_button.visible = false
+	_pause_title.text = "PAUSA"
+	_pause_message.text = "La partida esta detenida"
+	_resume_button.visible = true
+	_resume_button.disabled = false
+	_resume_button.text = "CONTINUAR"
+	_restart_button.visible = true
+	_restart_button.text = "REINICIAR"
+	_pause_settings_button.visible = true
+	_menu_button.text = "SALIR"
+	_menu_button.visible = true
+	_pause_overlay.visible = true
+	AudioManager.play_sfx("pause")
 
 
 func _resume_game() -> void:
 	if _mode != GameMode.PAUSED:
 		return
 	_mode = GameMode.PLAYING
-	_set_game_physics(true)
+	_set_game_physics(_intro_time_left <= 0.0)
 	_pause_overlay.visible = false
-	_pause_button.visible = true
+	_pause_button.visible = _intro_time_left <= 0.0
 	AudioManager.play_sfx("resume")
 
 
@@ -480,6 +551,7 @@ func _show_result_overlay(title: String, message: String) -> void:
 	_resume_button.visible = false
 	_restart_button.visible = true
 	_restart_button.text = "JUGAR DE NUEVO"
+	_pause_settings_button.visible = false
 	_menu_button.text = "VOLVER AL MENU"
 	_menu_button.visible = _is_custom_game
 	_pause_overlay.visible = true
@@ -494,6 +566,7 @@ func _show_game_over(message: String = "") -> void:
 	_resume_button.visible = not _continue_used and not _waiting_reward and AdsManager.is_rewarded_ready()
 	_restart_button.text = "EMPEZAR NIVEL 1"
 	_restart_button.visible = true
+	_pause_settings_button.visible = false
 	_menu_button.text = "VOLVER AL MENU"
 	_menu_button.visible = true
 	_pause_overlay.visible = true
@@ -550,6 +623,10 @@ func _return_to_menu() -> void:
 	SaveManager.flush()
 	_set_game_physics(false)
 	_mode = GameMode.MENU
+	_intro_time_left = 0.0
+	_grace_time_left = 0.0
+	if _intro_label != null:
+		_intro_label.visible = false
 	_waiting_interstitial = false
 	_interstitial_action = InterstitialAction.NONE
 	_pending_next_level = 0
@@ -568,7 +645,7 @@ func _return_to_menu() -> void:
 	_custom_panel.visible = false
 	_hell_screen.visible = false
 	_update_hell_button()
-	$UI/Menu/HighScore.text = "RECORD  %04d\nNIVEL MAXIMO  %02d" % [SaveManager.high_score, SaveManager.highest_level]
+	_high_score.text = "RECORD  %04d\nNIVEL MAXIMO  %02d" % [SaveManager.high_score, SaveManager.highest_level]
 
 
 func _open_achievements() -> void:
@@ -625,6 +702,39 @@ func _close_progress_screens() -> void:
 	_menu.visible = true
 
 
+func _setup_safe_area() -> void:
+	var menu_page := SafeAreaPage.new()
+	_menu.add_child(menu_page)
+	var menu_children: Array[Node] = [
+		$UI/Menu/Title,
+		$UI/Menu/Subtitle,
+		_high_score,
+		_start_button,
+		_custom_button,
+		_achievements_button,
+		_customize_button,
+		_settings_button,
+		_hell_button,
+		$UI/Menu/Hint,
+		$UI/Menu/Footer,
+	]
+	for item in menu_children:
+		item.reparent(menu_page, false)
+	var pause_page := SafeAreaPage.new()
+	_pause_overlay.add_child(pause_page)
+	var pause_children: Array[Node] = [
+		$UI/PauseOverlay/Card,
+		_pause_title,
+		_pause_message,
+		_resume_button,
+		_restart_button,
+		_pause_settings_button,
+		_menu_button,
+	]
+	for item in pause_children:
+		item.reparent(pause_page, false)
+
+
 func _build_progress_screens() -> void:
 	_achievements_screen = AchievementsScreen.new()
 	$UI.add_child(_achievements_screen)
@@ -632,6 +742,12 @@ func _build_progress_screens() -> void:
 	_customization_screen = CustomizationScreen.new()
 	$UI.add_child(_customization_screen)
 	_customization_screen.closed.connect(_close_progress_screens)
+	_settings_screen = SettingsScreen.new()
+	$UI.add_child(_settings_screen)
+	_settings_screen.closed.connect(_close_settings)
+	_tutorial_screen = TutorialScreen.new()
+	$UI.add_child(_tutorial_screen)
+	_tutorial_screen.closed.connect(_close_tutorial)
 
 
 func _build_hell_screen() -> void:
@@ -639,6 +755,69 @@ func _build_hell_screen() -> void:
 	$UI.add_child(_hell_screen)
 	_hell_screen.closed.connect(_close_hell_screen)
 	_hell_screen.level_selected.connect(_on_hell_level_selected)
+
+
+func _build_intro_label() -> void:
+	_intro_label = Label.new()
+	_intro_label.theme = ARCADE_THEME
+	_intro_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_intro_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_intro_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_intro_label.add_theme_font_size_override("font_size", 20)
+	_intro_label.add_theme_color_override("font_color", Color("#FDE68A"))
+	_intro_label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.6))
+	_intro_label.add_theme_constant_override("shadow_offset_x", 2)
+	_intro_label.add_theme_constant_override("shadow_offset_y", 2)
+	_intro_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_intro_label.visible = false
+	$UI.add_child(_intro_label)
+
+
+func _open_settings_from_menu() -> void:
+	if _mode != GameMode.MENU:
+		return
+	_settings_from_pause = false
+	_menu.visible = false
+	_settings_screen.open()
+
+
+func _open_settings_from_pause() -> void:
+	if _mode != GameMode.PAUSED:
+		return
+	_settings_from_pause = true
+	_pause_overlay.visible = false
+	_settings_screen.open()
+
+
+func _close_settings() -> void:
+	_settings_screen.visible = false
+	if _settings_from_pause and _mode == GameMode.PAUSED:
+		_pause_overlay.visible = true
+	else:
+		_menu.visible = true
+	_settings_from_pause = false
+
+
+func _open_tutorial() -> void:
+	if _mode != GameMode.MENU:
+		return
+	_menu.visible = false
+	_tutorial_screen.open()
+
+
+func _close_tutorial() -> void:
+	SaveManager.set_setting("tutorial_seen", true)
+	_tutorial_screen.visible = false
+	_menu.visible = true
+
+
+func _on_progress_reset() -> void:
+	_settings_from_pause = false
+	_settings_screen.visible = false
+	_tutorial_screen.visible = false
+	_return_to_menu()
+	UnlockManager.ensure_selection_valid()
+	_queue_unlock_toast("PROGRESO BORRADO")
 
 
 func _build_unlock_toast() -> void:
@@ -662,7 +841,10 @@ func _build_unlock_toast() -> void:
 	_toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_toast_panel.add_child(_toast_label)
 	_toast_panel.visible = false
-	$UI.add_child(_toast_panel)
+	var page := SafeAreaPage.new()
+	page.z_index = 100
+	$UI.add_child(page)
+	page.add_child(_toast_panel)
 
 
 func _on_achievement_unlocked(id: String) -> void:
@@ -779,6 +961,8 @@ func _build_custom_panel() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	shade.color = Color("#070817")
 	_custom_panel.add_child(shade)
+	var page := SafeAreaPage.new()
+	_custom_panel.add_child(page)
 	var panel := Panel.new()
 	panel.position = Vector2(18.0, 42.0)
 	panel.size = Vector2(324.0, 550.0)
@@ -788,7 +972,7 @@ func _build_custom_panel() -> void:
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(8)
 	panel.add_theme_stylebox_override("panel", style)
-	_custom_panel.add_child(panel)
+	page.add_child(panel)
 	var title := _custom_label("MODO PERSONALIZADO", Vector2(30.0, 18.0), Vector2(264.0, 32.0), 12)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	panel.add_child(title)
@@ -901,6 +1085,13 @@ func _configure_rivals() -> void:
 func _bind_rival(rival: RivalDog) -> void:
 	rival.player_caught.connect(_on_rival_caught)
 	rival.rival_eaten.connect(_on_rival_eaten)
+
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_WINDOW_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED:
+			if is_inside_tree():
+				_pause_game()
 
 
 func _unhandled_input(event: InputEvent) -> void:

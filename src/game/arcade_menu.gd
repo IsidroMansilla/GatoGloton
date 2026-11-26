@@ -2,6 +2,7 @@ extends Control
 
 
 func _ready() -> void:
+	get_viewport().size_changed.connect(queue_redraw)
 	queue_redraw()
 
 

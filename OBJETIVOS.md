@@ -342,6 +342,16 @@ Todo contenido desbloqueable tendra un identificador, categoria, requisito, recu
 - [x] Aislar el modo de estadisticas, logros y desbloqueos normales.
 - [x] Añadir pruebas de reglas, tiempo y ausencia de coleccionables.
 
+### Fase 9.6: Ajustes y pulido movil
+
+- [x] Anadir pantalla `AJUSTES` desde el menu y desde la pausa.
+- [x] Persistir mute, volumenes, vibracion, reducir movimiento y tutorial visto.
+- [x] Anadir vibracion opcional con permiso `VIBRATE`.
+- [x] Pausar automaticamente al perder el foco o pasar a segundo plano.
+- [x] Mostrar intro `READY` con gracia al iniciar cada nivel.
+- [x] Anadir tutorial de primer arranque.
+- [x] Reiniciar progreso con doble confirmacion conservando ajustes.
+
 ### Fase 10: Publicacion y calidad
 
 - [x] Ejecutar importacion headless sin errores.

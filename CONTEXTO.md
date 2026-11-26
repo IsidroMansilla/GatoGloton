@@ -35,7 +35,7 @@ export_presets.cfg
 AGENTS.md
 CONTEXTO.md
 OBJETIVOS.md
-src/autoload/               # estado, guardado, progresion, logros, desbloqueos, audio, anuncios y DevUnlock
+src/autoload/               # estado, guardado, progresion, logros, desbloqueos, audio, vibracion, anuncios y DevUnlock
 src/ads/                    # backends MockAds y AdMob/UMP
 src/game/                   # Main, Maze, Player, RivalDog, pantallas y menu
 src/data/                   # niveles, mapas, logros, cosmeticos, reglas de infierno y config personalizada
@@ -87,13 +87,15 @@ android/                    # plantilla de exportacion Android
 
 ### Guardado y estadisticas
 
-- Esquema versionado v3 compatible con saves v1, v2 y sin version.
+- Esquema versionado v4 compatible con saves v1, v2, v3 y sin version.
 - Conserva record y nivel maximo.
 - Guarda partidas iniciadas, terminadas por game over y ganadas, niveles
   completados, niveles sin dano, pellets, power-ups, rivales comidos y vidas perdidas.
 - Prepara persistencia de logros, desbloqueos y cosmeticos seleccionados.
 - Guarda la ultima configuracion del modo personalizado y la reutiliza al abrirlo.
 - Guarda los mejores tiempos del modo infierno por nivel.
+- Guarda ajustes persistentes: mute, volumen de musica/efectos, vibracion,
+  reducir movimiento y tutorial visto.
 - Las partidas personalizadas y las de infierno no alteran estadisticas, records,
   logros ni desbloqueos del modo normal.
 - Save ausente, corrupto o de version futura se maneja sin romper el arranque.
@@ -114,6 +116,17 @@ android/                    # plantilla de exportacion Android
 - Pantalla de logros con progreso por objetivo y pantalla de personalizacion
   con estado bloqueado, disponible o equipado.
 - La seleccion de cosmeticos se guarda en `user://save.json`.
+
+### Ajustes y pulido movil
+
+- Pantalla `AJUSTES` accesible desde el menu y desde la pausa.
+- Controles de sonido (mute), volumen de musica y efectos, vibracion,
+  reducir movimiento y reinicio de progreso con doble confirmacion.
+- Vibracion opcional en Android con permiso `VIBRATE`; se desactiva desde ajustes.
+- Pausa automatica al perder el foco o al pasar la app a segundo plano.
+- Intro `READY` de 1,2 s con gracia de 1 s al empezar cada nivel.
+- Tutorial de tres pasos la primera vez que se abre el juego.
+- El reinicio de progreso conserva los ajustes del jugador.
 
 ### Modo personalizado
 
@@ -148,8 +161,8 @@ cosmeticos y audio, el calculo de progreso, las reglas de desbloqueo, el contras
 visual, la generacion de pistas musicales, el cierre del interstitial simulado y
 las reglas y curva de oleadas del modo infierno.
 
-Resultado validado actualmente: `410 passed, 0 failed` en mapas, `106 passed, 0 failed`
-en guardado y `95 passed, 0 failed` en progresion.
+Resultado validado actualmente: `415 passed, 0 failed` en mapas, `144 passed, 0 failed`
+en guardado y `100 passed, 0 failed` en progresion.
 
 Para obtener un codigo de salida fiable en PowerShell se recomienda usar
 `Start-Process -Wait -PassThru`, porque el ejecutable Mono puede dejar

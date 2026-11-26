@@ -17,6 +17,10 @@ func _initialize() -> void:
 	_test_round_trip()
 	_test_v1_migration()
 	_test_v2_migration()
+	_test_v3_migration()
+	_test_settings_round_trip()
+	_test_settings_sanitization()
+	_test_reset_progress()
 	_test_unversioned_migration()
 	_test_corrupt_file()
 	_test_future_version()
@@ -70,6 +74,8 @@ func _test_round_trip() -> void:
 	manager.set_achievement_progress("level_10", 3)
 	manager.set_unlock_state("skin_gold", true)
 	manager.set_cosmetic("player", "gold")
+	manager.set_setting("vibration", false, false)
+	manager.set_setting("music_volume_db", -18.0, false)
 	var config := CustomGameConfig.new()
 	config.level_number = 12
 	config.player_speed = 80.0
@@ -112,7 +118,8 @@ func _test_round_trip() -> void:
 	_check(is_equal_approx(loaded.get_hell_best_time(3), 42.5), "round trip conserva record infernal")
 	_check(is_equal_approx(loaded.get_hell_best_time(4), 0.0), "niveles sin record infernal empiezan a 0")
 	_check(loaded.has_completed_normal_game(), "detecta partida normal completada")
-	_check(int(loaded.get_save_data().get("version", 0)) == 3, "round trip guarda version 3")
+	_check(not bool(loaded.get_setting("vibration", true)), "round trip conserva ajuste de vibracion")
+	_check(int(loaded.get_save_data().get("version", 0)) == 4, "round trip guarda version 4")
 	loaded.free()
 
 
@@ -132,9 +139,9 @@ func _test_v1_migration() -> void:
 	_check(manager.get_stats().get("runs_started", -1) == 0, "v1 crea estadisticas por defecto")
 	_check(manager.get_cosmetic("player") == "player_ember", "v1 crea cosmeticos por defecto")
 	_check(is_equal_approx(manager.get_hell_best_time(1), 0.0), "v1 crea records infernales por defecto")
-	_check(int(manager.get_save_data().get("version", 0)) == 3, "v1 migra a version 3")
+	_check(int(manager.get_save_data().get("version", 0)) == 4, "v1 migra a version 4")
 	var persisted := _read_json(path)
-	_check(int(persisted.get("version", 0)) == 3, "v1 migrado se persiste en disco")
+	_check(int(persisted.get("version", 0)) == 4, "v1 migrado se persiste en disco")
 	_check(int(persisted.get("high_score", 0)) == 500, "v1 migrado conserva high_score en disco")
 	_check(manager.save_game(), "v1 migrado se puede guardar")
 	manager.free()
@@ -154,8 +161,111 @@ func _test_v2_migration() -> void:
 	_check(manager.highest_level == 12, "v2 conserva highest_level")
 	_check(manager.get_stats().get("runs_won", -1) == 0, "v2 crea estadisticas por defecto")
 	_check(manager.get_stats().size() == 9, "v2 crea las 9 estadisticas")
-	_check(int(manager.get_save_data().get("version", 0)) == 3, "v2 migra a version 3")
+	_check(int(manager.get_save_data().get("version", 0)) == 4, "v2 migra a version 4")
+	_check(bool(manager.get_setting("vibration", false)), "v2 crea ajustes por defecto")
 	manager.free()
+
+
+func _test_v3_migration() -> void:
+	var path := _path("v3.json")
+	_write_raw(path, JSON.stringify({
+		"version": 3,
+		"high_score": 640,
+		"highest_level": 9,
+		"settings": {
+			"vibration": false,
+			"music_volume_db": -20.0,
+		},
+	}))
+	var manager := SAVE_MANAGER_SCRIPT.new()
+	manager.save_path = path
+	_check(manager.load_game(), "v3 se carga")
+	_check(manager.high_score == 640, "v3 conserva high_score")
+	_check(not bool(manager.get_setting("vibration", true)), "v3 conserva ajuste de vibracion")
+	_check(is_equal_approx(float(manager.get_setting("music_volume_db", 0.0)), -20.0), "v3 conserva volumen de musica")
+	_check(not bool(manager.get_setting("reduce_motion", true)), "v3 crea ajustes nuevos por defecto")
+	_check(int(manager.get_save_data().get("version", 0)) == 4, "v3 migra a version 4")
+	manager.free()
+
+
+func _test_settings_round_trip() -> void:
+	var path := _path("settings.json")
+	var manager := SAVE_MANAGER_SCRIPT.new()
+	manager.save_path = path
+	manager.set_setting("muted", true)
+	manager.set_setting("sfx_volume_db", -12.0)
+	manager.set_setting("reduce_motion", true)
+	manager.set_setting("tutorial_seen", true)
+	manager.free()
+	var loaded := SAVE_MANAGER_SCRIPT.new()
+	loaded.save_path = path
+	_check(loaded.load_game(), "ajustes se recargan")
+	_check(bool(loaded.get_setting("muted", false)), "ajustes conservan mute")
+	_check(is_equal_approx(float(loaded.get_setting("sfx_volume_db", 0.0)), -12.0), "ajustes conservan volumen de efectos")
+	_check(bool(loaded.get_setting("reduce_motion", false)), "ajustes conservan reducir movimiento")
+	_check(bool(loaded.get_setting("tutorial_seen", false)), "ajustes conservan tutorial visto")
+	loaded.free()
+
+
+func _test_settings_sanitization() -> void:
+	var path := _path("settings_invalid.json")
+	_write_raw(path, JSON.stringify({
+		"version": 4,
+		"settings": {
+			"muted": "true",
+			"music_volume_db": -999.0,
+			"sfx_volume_db": 50.0,
+			"vibration": [],
+			"reduce_motion": 1,
+			"tutorial_seen": "no",
+			"desconocido": "ignorado",
+		},
+	}))
+	var manager := SAVE_MANAGER_SCRIPT.new()
+	manager.save_path = path
+	_check(manager.load_game(), "ajustes invalidos se cargan saneados")
+	_check(bool(manager.get_setting("muted", false)), "texto booleano se interpreta")
+	_check(is_equal_approx(float(manager.get_setting("music_volume_db", 0.0)), -40.0), "volumen minimo se acota")
+	_check(is_equal_approx(float(manager.get_setting("sfx_volume_db", -3.0)), 0.0), "volumen maximo se acota")
+	_check(bool(manager.get_setting("vibration", false)), "lista invalida usa default")
+	_check(bool(manager.get_setting("reduce_motion", false)), "entero booleano se interpreta")
+	_check(not bool(manager.get_setting("tutorial_seen", true)), "texto no se interpreta como verdadero")
+	_check(not manager.get_settings().has("desconocido"), "ajustes desconocidos se descartan")
+	manager.free()
+
+
+func _test_reset_progress() -> void:
+	var path := _path("reset.json")
+	var manager := SAVE_MANAGER_SCRIPT.new()
+	manager.save_path = path
+	manager.high_score = 5000
+	manager.highest_level = 22
+	manager.record_run_started()
+	manager.set_achievement_progress("level_10", 10)
+	manager.set_unlock_state("player_mint", true)
+	manager.set_cosmetic("player", "player_mint")
+	manager.record_hell_time(3, 30.0)
+	manager.set_setting("vibration", false)
+	var reset_seen: Array[bool] = [false]
+	manager.progress_reset.connect(func() -> void: reset_seen[0] = true)
+	manager.reset_progress()
+	_check(manager.high_score == 0, "reset borra high_score")
+	_check(manager.highest_level == 1, "reset borra nivel maximo")
+	_check(int(manager.get_stats().get("runs_started", -1)) == 0, "reset borra estadisticas")
+	_check(manager.achievements.is_empty(), "reset borra logros")
+	_check(manager.unlocks.is_empty(), "reset borra desbloqueos")
+	_check(manager.get_cosmetic("player") == "player_ember", "reset restaura cosmeticos")
+	_check(not manager.has_custom_config(), "reset borra config personalizada")
+	_check(is_equal_approx(manager.get_hell_best_time(3), 0.0), "reset borra records de infierno")
+	_check(not bool(manager.get_setting("vibration", true)), "reset conserva ajustes")
+	_check(reset_seen[0], "reset emite progress_reset")
+	manager.free()
+	var loaded := SAVE_MANAGER_SCRIPT.new()
+	loaded.save_path = path
+	_check(loaded.load_game(), "reset se persiste")
+	_check(loaded.high_score == 0, "reset persistido borra high_score")
+	_check(not bool(loaded.get_setting("vibration", true)), "reset persistido conserva ajustes")
+	loaded.free()
 
 
 func _test_unversioned_migration() -> void:
@@ -169,7 +279,7 @@ func _test_unversioned_migration() -> void:
 	_check(manager.load_game(), "save sin version se carga como v1")
 	_check(manager.high_score == 250, "save sin version conserva high_score")
 	_check(manager.highest_level == 4, "save sin version conserva highest_level")
-	_check(int(manager.get_save_data().get("version", 0)) == 3, "save sin version migra a version 3")
+	_check(int(manager.get_save_data().get("version", 0)) == 4, "save sin version migra a version 4")
 	manager.free()
 
 
@@ -234,6 +344,11 @@ func _test_invalid_types() -> void:
 			"4": -1.0,
 			"x": 2.0,
 		},
+		"settings": {
+			"music_volume_db": -999.0,
+			"vibration": [],
+			"reduce_motion": 1,
+		},
 	}))
 	var manager := SAVE_MANAGER_SCRIPT.new()
 	manager.save_path = path
@@ -258,6 +373,10 @@ func _test_invalid_types() -> void:
 	_check(is_equal_approx(manager.get_hell_best_time(3), 12.5), "record infernal valido se conserva")
 	_check(is_equal_approx(manager.get_hell_best_time(4), 0.0), "record infernal negativo se descarta")
 	_check(is_equal_approx(manager.get_hell_best_time(99), 0.0), "record infernal fuera de rango se descarta")
+	_check(is_equal_approx(float(manager.get_setting("music_volume_db", 0.0)), -40.0), "volumen invalido se acota")
+	_check(bool(manager.get_setting("vibration", false)), "ajuste booleano invalido usa default")
+	_check(bool(manager.get_setting("reduce_motion", false)), "ajuste numerico booleano se interpreta")
+	_check(int(manager.get_save_data().get("version", 0)) == 4, "tipos invalidos migran a version 4")
 	manager.free()
 
 

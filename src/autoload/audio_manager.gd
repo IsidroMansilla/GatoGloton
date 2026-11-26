@@ -15,6 +15,7 @@ var _music_cache: Dictionary = {}
 
 
 func _ready() -> void:
+	_apply_settings()
 	if DisplayServer.get_name() == "headless":
 		return
 	_sfx_player = AudioStreamPlayer.new()
@@ -104,15 +105,43 @@ func play_sfx(effect: String) -> void:
 	_sfx_playback.push_buffer(samples)
 
 
-func set_muted(value: bool) -> void:
+func set_muted(value: bool, persist: bool = true) -> void:
 	muted = value
 	var master := AudioServer.get_bus_index("Master")
 	if master >= 0:
 		AudioServer.set_bus_mute(master, muted)
+	if persist:
+		SaveManager.set_setting("muted", muted)
 
 
 func toggle_muted() -> void:
 	set_muted(not muted)
+
+
+func set_music_volume_db(value: float, persist: bool = true) -> void:
+	music_volume_db = clampf(value, -40.0, 0.0)
+	if _music_player != null:
+		_music_player.volume_db = music_volume_db
+	if persist:
+		SaveManager.set_setting("music_volume_db", music_volume_db)
+
+
+func set_sfx_volume_db(value: float, persist: bool = true) -> void:
+	sfx_volume_db = clampf(value, -40.0, 0.0)
+	if _sfx_player != null:
+		_sfx_player.volume_db = sfx_volume_db
+	if persist:
+		SaveManager.set_setting("sfx_volume_db", sfx_volume_db)
+
+
+func _apply_settings() -> void:
+	var data := SaveManager.get_settings()
+	muted = bool(data.get("muted", muted))
+	music_volume_db = clampf(float(data.get("music_volume_db", music_volume_db)), -40.0, 0.0)
+	sfx_volume_db = clampf(float(data.get("sfx_volume_db", sfx_volume_db)), -40.0, 0.0)
+	var master := AudioServer.get_bus_index("Master")
+	if master >= 0:
+		AudioServer.set_bus_mute(master, muted)
 
 
 func set_sfx_style(style: String) -> void:

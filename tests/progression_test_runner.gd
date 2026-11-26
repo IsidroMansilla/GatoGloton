@@ -20,6 +20,7 @@ func _initialize() -> void:
 	_test_contrast()
 	_test_manager_api()
 	_test_audio_styles()
+	_test_haptics()
 	_test_ads_interstitial()
 	_test_hell_rules()
 	await process_frame
@@ -136,6 +137,24 @@ func _test_audio_styles() -> void:
 	_check(night != null and night.data.size() > 0, "genera pista de musica nocturna")
 	var invalid: AudioStreamWAV = audio.call("_build_music_stream", "invalida")
 	_check(invalid == null, "pista de musica invalida no se genera")
+	audio.set_music_volume_db(-20.0, false)
+	_check(is_equal_approx(float(audio.get("music_volume_db")), -20.0), "aplica volumen de musica")
+	audio.set_music_volume_db(-999.0, false)
+	_check(is_equal_approx(float(audio.get("music_volume_db")), -40.0), "acota volumen de musica")
+	audio.set_sfx_volume_db(5.0, false)
+	_check(is_equal_approx(float(audio.get("sfx_volume_db")), 0.0), "acota volumen de efectos")
+	audio.set_music_volume_db(-6.0, false)
+	audio.set_sfx_volume_db(-3.0, false)
+
+
+func _test_haptics() -> void:
+	var haptics := root.get_node_or_null("HapticsManager")
+	_check(haptics != null, "autoload HapticsManager disponible")
+	if haptics == null:
+		return
+	_check(haptics.has_method("pulse"), "HapticsManager expone pulse")
+	haptics.call("pulse", "pellet")
+	haptics.call("pulse", "desconocido")
 
 
 func _test_hell_rules() -> void:

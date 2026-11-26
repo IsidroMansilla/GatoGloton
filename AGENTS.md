@@ -48,7 +48,7 @@ Variables de release (Godot las lee directamente):
 ```
 project.godot
 export_presets.cfg          # presets "Android" (APK) y "Google Play" (AAB)
-src/autoload/               # singletons: GameState, SaveManager, ProgressionManager, AchievementManager, UnlockManager, AudioManager, AdsManager, DevUnlock
+src/autoload/               # singletons: GameState, SaveManager, ProgressionManager, AchievementManager, UnlockManager, AudioManager, HapticsManager, AdsManager, DevUnlock
 src/ads/                    # AdsBackend, MockAds, AdMobBackend
 src/game/                   # escenas y scripts de juego (main, maze, player, rival_dog, pantallas, hell_select_screen)
 src/data/                   # niveles, mapas, logros, cosmeticos, reglas de infierno y modo personalizado
@@ -74,15 +74,16 @@ scripts/                    # build, validacion y renderizado
 
 - **Autoloads**
   - `GameState`: score, vidas, nivel, modo personalizado y senales de cambio.
-  - `SaveManager`: JSON versionado v3 en `user://save.json`, record, nivel maximo, estadisticas, logros/desbloqueos/cosmeticos, ultima config personalizada y records de tiempo del modo infierno.
+  - `SaveManager`: JSON versionado v4 en `user://save.json`, record, nivel maximo, estadisticas, logros/desbloqueos/cosmeticos, ultima config personalizada, records de tiempo del modo infierno y ajustes persistentes (audio, vibracion, reducir movimiento y tutorial visto).
   - `ProgressionManager`: catalogo y avance de los 30 niveles progresivos.
   - `AchievementManager`: catalogo, progreso y notificaciones de los 17 logros.
   - `UnlockManager`: reglas, seleccion y paletas de los cosmeticos desbloqueables.
-  - `AudioManager`: volumen/mute, reproduccion de SFX y musica.
+  - `AudioManager`: volumen/mute persistidos, reproduccion de SFX y musica.
+  - `HapticsManager`: vibracion opcional en Android/iOS, desactivable desde ajustes.
   - `AdsManager`: fachada sobre `AdsBackend`; elige `MockAds` en desktop/editor y `AdMobBackend` en Android.
   - `DevUnlock`: en ejecuciones de escritorio debug (no headless ni Android) desbloquea automaticamente todos los logros, cosmeticos, el nivel 30 y el modo infierno para pruebas integrales.
 - **Juego**
-  - `Main`: state machine `Menu -> Playing -> Paused -> GameOver -> LevelClear`, con flujos separados para progresion, modo personalizado y modo infierno.
+  - `Main`: state machine `Menu -> Playing -> Paused -> GameOver -> LevelClear`, con flujos separados para progresion, modo personalizado y modo infierno, pausa automatica al perder foco e intro `READY` con gracia al iniciar nivel.
   - `Maze`: mapas generados en celdas completas, pellets, conectividad, respawn seguro y tema infernal con paredes de fuego.
   - `Player`, `RivalDog`: movimiento grid-locked y estados de IA; en infierno los rivales se dibujan como demonios rojos.
   - **Modo infierno**: desbloqueado al ganar una partida normal, selector libre de 30 niveles, una vida, sin pellets, cronometro y oleadas progresivas de demonios.
